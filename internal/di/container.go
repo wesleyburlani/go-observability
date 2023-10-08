@@ -15,7 +15,7 @@ import (
 func BuildContainer() (*di.Container, error) {
 	general := di.Options(
 		di.Provide(func() *config.Config {
-			c, err := config.LoadEnvConfig(".env")
+			c, err := config.LoadDotEnvConfig(".env")
 			if err != nil {
 				panic(err)
 			}
