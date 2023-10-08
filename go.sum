@@ -1,0 +1,4 @@
+github.com/defval/di v1.12.0 h1:xXm7BMX2+Nr0Yyu55DeJl/rmfCA7CQX89f4AGE0zA6U=
+github.com/defval/di v1.12.0/go.mod h1:PhVbOxQOvU7oawTOJXXTvqOJp1Dvsjs5PuzMw9gGl0I=
+github.com/go-chi/chi/v5 v5.0.10 h1:rLz5avzKpjqxrYwXNfmjkrYYXOyLJd37pz53UFHC6vk=
+github.com/go-chi/chi/v5 v5.0.10/go.mod h1:DslCQbL2OYiznFReuXYUmQ2hGd1aDpCnlMNITLSKoi8=
