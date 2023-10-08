@@ -9,8 +9,6 @@ import (
 	pkg_http_middlewares "github.com/wesleyburlani/go-rest/pkg/http/middlewares"
 )
 
-type HttpServer struct{}
-
 func CreateApp(container di.Container) http.Handler {
 	r := chi.NewRouter()
 	container.Invoke(func(m *pkg_http_middlewares.Logger) { r.Use(m.Handle) })
