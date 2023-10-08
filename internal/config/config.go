@@ -1,8 +1,6 @@
 package config
 
 import (
-	"log"
-
 	"github.com/go-playground/validator/v10"
 	"github.com/spf13/viper"
 )
@@ -31,7 +29,7 @@ func LoadEnvConfig(path string) (Config, error) {
 
 	validate := validator.New()
 	if err := validate.Struct(&config); err != nil {
-		log.Fatalf("Missing required attributes %v\n", err)
+		return Config{}, err
 	}
 
 	return config, nil
