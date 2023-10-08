@@ -9,11 +9,11 @@ import (
 	pkg_http_middlewares "github.com/wesleyburlani/go-rest/pkg/http/middlewares"
 )
 
-func CreateApp(container di.Container) http.Handler {
+func CreateApp(c *di.Container) http.Handler {
 	r := chi.NewRouter()
-	container.Invoke(func(m *pkg_http_middlewares.Logger) { r.Use(m.Handle) })
+	c.Invoke(func(m *pkg_http_middlewares.Logger) { r.Use(m.Handle) })
 	r.Group(func(r chi.Router) {
-		container.Invoke(func(c *pkg_http_controllers.Health) { r.Mount("/health", c.Router()) })
+		c.Invoke(func(c *pkg_http_controllers.Health) { r.Mount("/health", c.Router()) })
 	})
 	return r
 }
