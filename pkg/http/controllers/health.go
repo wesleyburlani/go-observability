@@ -2,14 +2,16 @@ package controllers
 
 import (
 	"encoding/json"
-	"log"
+	"log/slog"
 	"net/http"
 )
 
-type Health struct{}
+type Health struct {
+	logger *slog.Logger
+}
 
-func NewHealth() *Health {
-	return &Health{}
+func NewHealth(logger *slog.Logger) *Health {
+	return &Health{logger: logger}
 }
 
 type HealthGetResponse struct {
@@ -27,14 +29,16 @@ func (c *Health) get(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusMethodNotAllowed)
 		return
 	}
-	w.WriteHeader(http.StatusOK)
-	w.Header().Set("Content-Type", "application/json")
 	resp := HealthGetResponse{
 		Status: "healthy",
 	}
 	jsonResp, err := json.Marshal(resp)
 	if err != nil {
-		log.Fatalf("Error happened in JSON marshal. Err: %s", err)
+		c.logger.Error("Error happened in JSON marshal", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
 	}
+	w.WriteHeader(http.StatusOK)
+	w.Header().Set("Content-Type", "application/json")
 	w.Write(jsonResp)
 }
