@@ -26,14 +26,11 @@ func BuildContainer() (*di.Container, error) {
 		}),
 	)
 
-	middlewares := di.Options(
+	observability := di.Options(
+		di.Provide(pkg_http_controllers.NewHealth, di.As(new(pkg_http.Controller))),
 		di.Provide(pkg_http_middlewares.NewLogger, di.As(new(pkg_http.Middleware))),
 	)
 
-	controllers := di.Options(
-		di.Provide(pkg_http_controllers.NewHealth, di.As(new(pkg_http.Controller))),
-	)
-
-	container, err := di.New(general, middlewares, controllers)
+	container, err := di.New(general, observability)
 	return container, err
 }
