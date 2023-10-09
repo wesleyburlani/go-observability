@@ -2,9 +2,13 @@ package logger
 
 import (
 	"context"
+	"fmt"
+	"io"
 	"os"
+	"strings"
 
-	"github.com/sagikazarmark/slog-shim"
+	"log/slog"
+
 	"go.opentelemetry.io/otel/trace"
 )
 
@@ -17,15 +21,40 @@ const (
 	LevelError = slog.LevelError
 )
 
+func ParseLevel(level string) (Level, error) {
+	switch strings.ToLower(level) {
+	case "debug":
+		return LevelDebug, nil
+	case "info":
+		return LevelInfo, nil
+	case "warn":
+		return LevelWarn, nil
+	case "error":
+		return LevelError, nil
+	default:
+		return LevelInfo, fmt.Errorf("invalid log level: %s", level)
+	}
+}
+
+type Options struct {
+	Enabled bool
+	Level   Level
+}
+
 type Logger struct {
 	logger *slog.Logger
 	ctx    *context.Context
 }
 
 // returns a new logger.
-func NewLogger() *Logger {
+func NewLogger(options Options) *Logger {
+	w := io.Discard
+	if options.Enabled {
+		w = os.Stdout
+	}
+
 	return &Logger{
-		logger: slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelDebug})),
+		logger: slog.New(slog.NewJSONHandler(w, &slog.HandlerOptions{Level: options.Level})),
 		ctx:    nil,
 	}
 }

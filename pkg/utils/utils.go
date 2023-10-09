@@ -1,6 +1,6 @@
 package utils
 
-func PanicOnError(err error) {
+func PanicOnNotNil(err error) {
 	if err != nil {
 		panic(err)
 	}

@@ -16,18 +16,18 @@ import (
 
 func main() {
 	cfg, err := config.LoadDotEnvConfig(".env")
-	utils.PanicOnError(err)
+	utils.PanicOnNotNil(err)
 
 	otelShutdown, err := observability.SetupOTelSDK(context.Background(), cfg.ServiceName, cfg.ServiceVersion)
-	utils.PanicOnError(err)
+	utils.PanicOnNotNil(err)
 
 	defer func() {
 		err = otelShutdown(context.Background())
-		utils.PanicOnError(err)
+		utils.PanicOnNotNil(err)
 	}()
 
 	container, err := di.BuildContainer(&cfg)
-	utils.PanicOnError(err)
+	utils.PanicOnNotNil(err)
 
 	err = container.Invoke(func(c *config.Config, l *logger.Logger) {
 		var wg sync.WaitGroup
@@ -45,5 +45,5 @@ func main() {
 		l.With("address", addr).Info("server started")
 		wg.Wait()
 	})
-	utils.PanicOnError(err)
+	utils.PanicOnNotNil(err)
 }

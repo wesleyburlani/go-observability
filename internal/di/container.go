@@ -8,18 +8,17 @@ import (
 	pkg_http_controllers "github.com/wesleyburlani/go-rest/pkg/http/controllers"
 	pkg_http_middlewares "github.com/wesleyburlani/go-rest/pkg/http/middlewares"
 	"github.com/wesleyburlani/go-rest/pkg/logger"
+	"github.com/wesleyburlani/go-rest/pkg/utils"
 )
 
 func BuildContainer(c *config.Config) (*di.Container, error) {
 	general := di.Options(
-		di.Provide(func() *config.Config {
-			c, err := config.LoadDotEnvConfig(".env")
-			if err != nil {
-				panic(err)
-			}
-			return &c
+		di.Provide(func() *config.Config { return c }),
+		di.Provide(func() *logger.Logger {
+			level, err := logger.ParseLevel(c.LogLevel)
+			utils.PanicOnNotNil(err)
+			return logger.NewLogger(logger.Options{Enabled: c.LogEnabled, Level: level})
 		}),
-		di.Provide(logger.NewLogger),
 	)
 
 	observability := di.Options(
