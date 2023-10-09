@@ -1,7 +1,7 @@
 package main
 
 import (
-	"log/slog"
+	"context"
 	"net/http"
 	"os"
 	"sync"
@@ -9,15 +9,27 @@ import (
 	"github.com/wesleyburlani/go-rest/internal/config"
 	"github.com/wesleyburlani/go-rest/internal/di"
 	_http "github.com/wesleyburlani/go-rest/internal/transport/http"
+	"github.com/wesleyburlani/go-rest/pkg/logger"
+	"github.com/wesleyburlani/go-rest/pkg/observability"
+	"github.com/wesleyburlani/go-rest/pkg/utils"
 )
 
 func main() {
-	container, err := di.BuildContainer()
-	if err != nil {
-		slog.Error("error building container", err)
-	}
+	cfg, err := config.LoadDotEnvConfig(".env")
+	utils.PanicOnError(err)
 
-	err = container.Invoke(func(c *config.Config, l *slog.Logger) {
+	otelShutdown, err := observability.SetupOTelSDK(context.Background(), cfg.ServiceName, cfg.ServiceVersion)
+	utils.PanicOnError(err)
+
+	defer func() {
+		err = otelShutdown(context.Background())
+		utils.PanicOnError(err)
+	}()
+
+	container, err := di.BuildContainer(&cfg)
+	utils.PanicOnError(err)
+
+	err = container.Invoke(func(c *config.Config, l *logger.Logger) {
 		var wg sync.WaitGroup
 		wg.Add(1)
 		addr := c.HttpAddress
@@ -26,14 +38,12 @@ func main() {
 			app := _http.CreateApp(container)
 			err = http.ListenAndServe(addr, app)
 			if err != nil {
-				l.Error("error starting http server", "address", addr, "error", err)
+				l.With("address", addr, "error", err).Error("error starting http server")
 				os.Exit(1)
 			}
 		}()
-		l.Info("server started", "address", addr)
+		l.With("address", addr).Info("server started")
 		wg.Wait()
 	})
-	if err != nil {
-		slog.Error("error invoking container", err)
-	}
+	utils.PanicOnError(err)
 }

@@ -3,7 +3,9 @@ package config
 import pkg_config "github.com/wesleyburlani/go-rest/pkg/config"
 
 type Config struct {
-	HttpAddress string `mapstructure:"HTTP_ADDRESS" validate:"required"`
+	ServiceName    string `mapstructure:"SERVICE_NAME" validate:"required"`
+	ServiceVersion string `mapstructure:"SERVICE_VERSION" validate:"required"`
+	HttpAddress    string `mapstructure:"HTTP_ADDRESS" validate:"required"`
 }
 
 func LoadDotEnvConfig(path string) (Config, error) {

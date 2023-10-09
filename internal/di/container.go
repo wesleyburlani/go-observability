@@ -1,18 +1,16 @@
 package di
 
 import (
-	"log/slog"
-	"os"
-
 	"github.com/defval/di"
 
 	"github.com/wesleyburlani/go-rest/internal/config"
 	pkg_http "github.com/wesleyburlani/go-rest/pkg/http"
 	pkg_http_controllers "github.com/wesleyburlani/go-rest/pkg/http/controllers"
 	pkg_http_middlewares "github.com/wesleyburlani/go-rest/pkg/http/middlewares"
+	"github.com/wesleyburlani/go-rest/pkg/logger"
 )
 
-func BuildContainer() (*di.Container, error) {
+func BuildContainer(c *config.Config) (*di.Container, error) {
 	general := di.Options(
 		di.Provide(func() *config.Config {
 			c, err := config.LoadDotEnvConfig(".env")
@@ -21,9 +19,7 @@ func BuildContainer() (*di.Container, error) {
 			}
 			return &c
 		}),
-		di.Provide(func() *slog.Logger {
-			return slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelDebug}))
-		}),
+		di.Provide(logger.NewLogger),
 	)
 
 	observability := di.Options(

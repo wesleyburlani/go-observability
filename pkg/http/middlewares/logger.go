@@ -1,36 +1,35 @@
 package middlewares
 
 import (
-	"log/slog"
 	"net/http"
 	"time"
+
+	"github.com/wesleyburlani/go-rest/pkg/logger"
 )
 
 type Logger struct {
-	logger *slog.Logger
+	logger *logger.Logger
 }
 
-func NewLogger(logger *slog.Logger) *Logger {
+func NewLogger(logger *logger.Logger) *Logger {
 	return &Logger{logger: logger}
 }
 
 func (l *Logger) Handle(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		t1 := time.Now()
-		l.logger.Debug("request received",
+		logger := l.logger.With(
 			"method", r.Method,
 			"path", r.URL.String(),
 			"origin", r.RemoteAddr,
 		)
+		logger.WithContext(r.Context()).Debug("request received")
 		lrw := newLoggingResponseWriter(w)
 		next.ServeHTTP(lrw, r)
-		l.logger.Debug("request completed",
-			"method", r.Method,
-			"path", r.URL.String(),
-			"origin", r.RemoteAddr,
+		logger.With(
 			"latency", time.Since(t1).String(),
 			"status", lrw.statusCode,
-		)
+		).WithContext(r.Context()).Debug("request completed")
 	})
 }
 

@@ -2,15 +2,16 @@ package controllers
 
 import (
 	"encoding/json"
-	"log/slog"
 	"net/http"
+
+	"github.com/wesleyburlani/go-rest/pkg/logger"
 )
 
 type Health struct {
-	logger *slog.Logger
+	logger *logger.Logger
 }
 
-func NewHealth(logger *slog.Logger) *Health {
+func NewHealth(logger *logger.Logger) *Health {
 	return &Health{logger: logger}
 }
 
@@ -34,7 +35,10 @@ func (c *Health) get(w http.ResponseWriter, r *http.Request) {
 	}
 	jsonResp, err := json.Marshal(resp)
 	if err != nil {
-		c.logger.Error("Error happened in JSON marshal", err)
+		c.logger.
+			WithContext(r.Context()).
+			With(err).
+			Error("Error happened in JSON marshal")
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
