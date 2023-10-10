@@ -85,8 +85,16 @@ func (l *Logger) Log(ctx context.Context, level Level, msg string) {
 	spanContext := span.SpanContext()
 	traceId := spanContext.TraceID()
 	spanId := spanContext.SpanID()
+
+	args := []any{}
+	if traceId.IsValid() {
+		args = append(args, "trace_id", traceId)
+	}
+	if spanId.IsValid() {
+		args = append(args, "span_id", spanId)
+	}
+
 	l.logger.With(
-		"trace_id", traceId,
-		"span_id", spanId,
+		args...,
 	).Log(ctx, level, msg)
 }
