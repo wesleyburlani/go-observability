@@ -1,0 +1,27 @@
+# open telemetry example using zipkin: https://github.com/open-telemetry/opentelemetry-js/tree/main/examples/otlp-exporter-node
+
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: "0.0.0.0:4317"
+      http:
+        endpoint: "0.0.0.0:4318"
+
+exporters:
+  jaeger:
+    endpoint: "jaeger-all-in-one:14250"
+    tls:
+      insecure: true
+
+processors:
+
+service:
+  #telemetry:
+    #logs:
+      #level: "debug"
+  pipelines:
+    traces:
+      receivers: [otlp]
+      exporters: [jaeger]
+      processors: []

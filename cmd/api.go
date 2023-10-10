@@ -18,7 +18,14 @@ func main() {
 	cfg, err := config.LoadDotEnvConfig(".env")
 	utils.PanicOnNotNil(err)
 
-	otelShutdown, err := observability.SetupOTelSDK(context.Background(), cfg.ServiceName, cfg.ServiceVersion)
+	otelShutdown, err := observability.SetupOtel(observability.OtelConfig{
+		Ctx:                      context.Background(),
+		ServiceName:              cfg.ServiceName,
+		ServiceVersion:           cfg.ServiceVersion,
+		OtelExporterOtlpEndpoint: cfg.OtelExporterOtlpEndpoint,
+		OtelExporterOtlpInsecure: cfg.OtelExporterOtlpInsecure,
+		OtelExporterOtlpUrlPath:  cfg.OtelExporterOtlpUrlPath,
+	})
 	utils.PanicOnNotNil(err)
 
 	defer func() {
