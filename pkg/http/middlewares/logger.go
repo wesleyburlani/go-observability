@@ -23,13 +23,13 @@ func (l *Logger) Handle(next http.Handler) http.Handler {
 			"path", r.URL.String(),
 			"origin", r.RemoteAddr,
 		)
-		logger.WithContext(r.Context()).Debug("request received")
+		logger.Debug(r.Context(), "request received")
 		lrw := newLoggingResponseWriter(w)
 		next.ServeHTTP(lrw, r)
 		logger.With(
 			"latency", time.Since(t1).String(),
 			"status", lrw.statusCode,
-		).WithContext(r.Context()).Debug("request completed")
+		).Debug(r.Context(), "request completed")
 	})
 }
 

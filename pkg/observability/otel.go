@@ -14,7 +14,6 @@ import (
 )
 
 type OtelConfig struct {
-	Ctx                      context.Context
 	ServiceName              string
 	ServiceVersion           string
 	OtelExporterOtlpEndpoint string
@@ -24,7 +23,7 @@ type OtelConfig struct {
 
 // setupOTelSDK bootstraps the OpenTelemetry pipeline.
 // If it does not return an error, make sure to call shutdown for proper cleanup.
-func SetupOtel(config OtelConfig) (shutdown func(context.Context) error, err error) {
+func SetupOtel(ctx context.Context, config OtelConfig) (shutdown func(context.Context) error, err error) {
 	var shutdownFuncs []func(context.Context) error
 
 	// shutdown calls cleanup functions registered via shutdownFuncs.
@@ -41,7 +40,7 @@ func SetupOtel(config OtelConfig) (shutdown func(context.Context) error, err err
 
 	// handleErr calls shutdown for cleanup and makes sure that all errors are returned.
 	handleErr := func(inErr error) {
-		err = errors.Join(inErr, shutdown(config.Ctx))
+		err = errors.Join(inErr, shutdown(ctx))
 	}
 
 	// Setup resource.
@@ -52,7 +51,7 @@ func SetupOtel(config OtelConfig) (shutdown func(context.Context) error, err err
 	}
 
 	// Setup trace provider.
-	tracerProvider, err := newTraceProvider(config, res)
+	tracerProvider, err := newTraceProvider(ctx, config, res)
 	if err != nil {
 		handleErr(err)
 		return
@@ -80,7 +79,7 @@ func newResource(config OtelConfig) (*resource.Resource, error) {
 		))
 }
 
-func newTraceProvider(config OtelConfig, res *resource.Resource) (*trace.TracerProvider, error) {
+func newTraceProvider(ctx context.Context, config OtelConfig, res *resource.Resource) (*trace.TracerProvider, error) {
 	options := []otlptracehttp.Option{}
 
 	if config.OtelExporterOtlpEndpoint != "" {
@@ -95,7 +94,7 @@ func newTraceProvider(config OtelConfig, res *resource.Resource) (*trace.TracerP
 		options = append(options, otlptracehttp.WithInsecure())
 	}
 
-	traceExporter, err := otlptracehttp.New(config.Ctx, options...)
+	traceExporter, err := otlptracehttp.New(ctx, options...)
 	if err != nil {
 		return nil, err
 	}

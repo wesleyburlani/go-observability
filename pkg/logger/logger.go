@@ -43,7 +43,6 @@ type Options struct {
 
 type Logger struct {
 	logger *slog.Logger
-	ctx    *context.Context
 }
 
 // returns a new logger.
@@ -55,15 +54,6 @@ func NewLogger(options Options) *Logger {
 
 	return &Logger{
 		logger: slog.New(slog.NewJSONHandler(w, &slog.HandlerOptions{Level: options.Level})),
-		ctx:    nil,
-	}
-}
-
-// returns a new logger with the given context.
-func (l *Logger) WithContext(ctx context.Context) *Logger {
-	return &Logger{
-		logger: l.logger,
-		ctx:    &ctx,
 	}
 }
 
@@ -71,37 +61,32 @@ func (l *Logger) WithContext(ctx context.Context) *Logger {
 func (l *Logger) With(args ...any) *Logger {
 	return &Logger{
 		logger: l.logger.With(args...),
-		ctx:    l.ctx,
 	}
 }
 
-func (l *Logger) Debug(msg string) {
-	l.Log(LevelDebug, msg)
+func (l *Logger) Debug(ctx context.Context, msg string) {
+	l.Log(ctx, LevelDebug, msg)
 }
 
-func (l *Logger) Info(msg string) {
-	l.Log(LevelInfo, msg)
+func (l *Logger) Info(ctx context.Context, msg string) {
+	l.Log(ctx, LevelInfo, msg)
 }
 
-func (l *Logger) Warn(msg string) {
-	l.Log(LevelWarn, msg)
+func (l *Logger) Warn(ctx context.Context, msg string) {
+	l.Log(ctx, LevelWarn, msg)
 }
 
-func (l *Logger) Error(msg string) {
-	l.Log(LevelError, msg)
+func (l *Logger) Error(ctx context.Context, msg string) {
+	l.Log(ctx, LevelError, msg)
 }
 
-func (l *Logger) Log(level Level, msg string) {
-	if l.ctx == nil {
-		l.logger.Log(context.Background(), level, msg)
-		return
-	}
-	span := trace.SpanFromContext(*l.ctx)
+func (l *Logger) Log(ctx context.Context, level Level, msg string) {
+	span := trace.SpanFromContext(ctx)
 	spanContext := span.SpanContext()
 	traceId := spanContext.TraceID()
 	spanId := spanContext.SpanID()
 	l.logger.With(
 		"trace_id", traceId,
 		"span_id", spanId,
-	).Log(*l.ctx, level, msg)
+	).Log(ctx, level, msg)
 }

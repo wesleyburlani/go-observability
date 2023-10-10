@@ -15,11 +15,11 @@ import (
 )
 
 func main() {
+	ctx := context.Background()
 	cfg, err := config.LoadDotEnvConfig(".env")
 	utils.PanicOnNotNil(err)
 
-	otelShutdown, err := observability.SetupOtel(observability.OtelConfig{
-		Ctx:                      context.Background(),
+	otelShutdown, err := observability.SetupOtel(ctx, observability.OtelConfig{
 		ServiceName:              cfg.ServiceName,
 		ServiceVersion:           cfg.ServiceVersion,
 		OtelExporterOtlpEndpoint: cfg.OtelExporterOtlpEndpoint,
@@ -45,11 +45,11 @@ func main() {
 			app := _http.CreateApp(container)
 			err = http.ListenAndServe(addr, app)
 			if err != nil {
-				l.With("address", addr, "error", err).Error("error starting http server")
+				l.With("address", addr, "error", err).Error(ctx, "error starting http server")
 				os.Exit(1)
 			}
 		}()
-		l.With("address", addr).Info("server started")
+		l.With("address", addr).Info(ctx, "server started")
 		wg.Wait()
 	})
 	utils.PanicOnNotNil(err)

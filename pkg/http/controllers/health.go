@@ -36,9 +36,8 @@ func (c *Health) get(w http.ResponseWriter, r *http.Request) {
 	jsonResp, err := json.Marshal(resp)
 	if err != nil {
 		c.logger.
-			WithContext(r.Context()).
 			With(err).
-			Error("Error happened in JSON marshal")
+			Error(r.Context(), "Error happened in JSON marshal")
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
