@@ -14,6 +14,18 @@ WHERE email = @email;
 SELECT * FROM users
 WHERE username = @username;
 
+-- name: CreateUser :one
+INSERT INTO users (
+  username,
+  email,
+  password
+) VALUES (
+  @username,
+  @email,
+  @password
+)
+RETURNING *;
+
 -- name: UpdateUser :one
 UPDATE users SET
   username = coalesce(sqlc.narg(username), username),
