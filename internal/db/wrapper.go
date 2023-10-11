@@ -5,6 +5,8 @@ import (
 
 	"github.com/uptrace/opentelemetry-go-extra/otelsql"
 	semconv "go.opentelemetry.io/otel/semconv/v1.4.0"
+
+	_ "github.com/lib/pq"
 )
 
 type Database struct {

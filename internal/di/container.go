@@ -5,6 +5,8 @@ import (
 
 	"github.com/wesleyburlani/go-rest/internal/config"
 	"github.com/wesleyburlani/go-rest/internal/db"
+	http_controllers "github.com/wesleyburlani/go-rest/internal/transport/http/controllers"
+	"github.com/wesleyburlani/go-rest/internal/users"
 	pkg_http "github.com/wesleyburlani/go-rest/pkg/http"
 	pkg_http_controllers "github.com/wesleyburlani/go-rest/pkg/http/controllers"
 	pkg_http_middlewares "github.com/wesleyburlani/go-rest/pkg/http/middlewares"
@@ -35,6 +37,12 @@ func BuildContainer(c *config.Config) (*di.Container, error) {
 		di.Provide(pkg_http_middlewares.NewLogger, di.As(new(pkg_http.Middleware))),
 	)
 
-	container, err := di.New(general, storage, observability)
+	users := di.Options(
+		di.Provide(users.NewRepository),
+		di.Provide(users.NewService),
+		di.Provide(http_controllers.NewUsers, di.As(new(pkg_http.Controller))),
+	)
+
+	container, err := di.New(general, storage, observability, users)
 	return container, err
 }

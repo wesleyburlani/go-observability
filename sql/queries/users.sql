@@ -2,7 +2,7 @@ SELECT * FROM users
 ORDER BY id
 LIMIT $1 OFFSET $2;
 
--- name: GetUserById :one
+-- name: GetUser :one
 SELECT * FROM users
 WHERE id = @id;
 
@@ -34,17 +34,7 @@ UPDATE users SET
 WHERE id = @id
 RETURNING *;
 
--- name: DeleteUserById :one
+-- name: DeleteUser :one
 DELETE FROM users
 WHERE id = @id
-RETURNING *;
-
--- name: DeleteUserByEmail :one
-DELETE FROM users
-WHERE email = @email
-RETURNING *;
-
--- name: DeleteUserByUsername :one
-DELETE FROM users
-WHERE username = @username
 RETURNING *;
