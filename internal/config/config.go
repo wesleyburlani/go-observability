@@ -13,6 +13,7 @@ type Config struct {
 	OtelExporterOtlpEndpoint string `mapstructure:"OTEL_EXPORTER_OTLP_ENDPOINT"`
 	OtelExporterOtlpInsecure bool   `mapstructure:"OTEL_EXPORTER_OTLP_INSECURE"`
 	OtelExporterOtlpUrlPath  string `mapstructure:"OTEL_EXPORTER_OTLP_URL_PATH"`
+	DatabaseUrl              string `mapstructure:"DATABASE_URL" validate:"required"`
 }
 
 func LoadDotEnvConfig(path string) (Config, error) {
