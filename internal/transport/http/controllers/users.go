@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"context"
+	"errors"
 	"net/http"
 	"strconv"
 	"time"
@@ -10,6 +11,7 @@ import (
 	"github.com/go-chi/render"
 	"github.com/go-playground/validator/v10"
 	"github.com/wesleyburlani/go-rest/internal/users"
+	pkg_errors "github.com/wesleyburlani/go-rest/pkg/errors"
 	"github.com/wesleyburlani/go-rest/pkg/logger"
 )
 
@@ -50,6 +52,11 @@ func (c *Users) get(w http.ResponseWriter, r *http.Request) {
 
 	u, err := c.svc.Get(ctx, id)
 	if err != nil {
+		if errors.Is(err, pkg_errors.ErrNotFound) {
+			w.WriteHeader(http.StatusNotFound)
+			render.JSON(w, r, map[string]string{"error": err.Error()})
+			return
+		}
 		w.WriteHeader(http.StatusInternalServerError)
 		render.JSON(w, r, map[string]string{"error": err.Error()})
 		return

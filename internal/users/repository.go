@@ -3,7 +3,10 @@ package users
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"time"
+
+	pkg_errors "github.com/wesleyburlani/go-rest/pkg/errors"
 
 	"github.com/wesleyburlani/go-rest/internal/db"
 )
@@ -22,6 +25,9 @@ func (r *Repository) Get(ctx context.Context, id int64) (User, error) {
 
 	u, err := r.db.Queries.GetUser(ctx, id)
 	if err != nil {
+		if err == sql.ErrNoRows {
+			return User{}, fmt.Errorf("could not found user with id %d: %w", id, pkg_errors.ErrNotFound)
+		}
 		return User{}, err
 	}
 
