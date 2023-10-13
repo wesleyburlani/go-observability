@@ -63,7 +63,7 @@ func (r *Repository) Create(ctx context.Context, u User) (User, error) {
 	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
 	defer cancel()
 
-	encryptedPwd, err := EncryptPassword(u.Password)
+	encryptedPwd, err := encryptPassword(u.Password)
 
 	if err != nil {
 		return User{}, fmt.Errorf("could not encrypt password: %w", err)
@@ -91,7 +91,7 @@ func (r *Repository) Update(ctx context.Context, u User) (User, error) {
 	pwd := sql.NullString{Valid: u.Password != "", String: u.Password}
 
 	if pwd.Valid {
-		encryptedPwd, err := EncryptPassword(u.Password)
+		encryptedPwd, err := encryptPassword(u.Password)
 		if err != nil {
 			return User{}, fmt.Errorf("could not encrypt password: %w", err)
 		}

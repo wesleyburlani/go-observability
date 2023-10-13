@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"github.com/go-chi/chi/v5"
-	"github.com/go-chi/render"
 	http_utils "github.com/wesleyburlani/go-rest/internal/transport/http/utils"
 	"github.com/wesleyburlani/go-rest/internal/users"
 	"github.com/wesleyburlani/go-rest/pkg/logger"
@@ -63,8 +62,7 @@ func (c *Users) get(w http.ResponseWriter, r *http.Request) {
 		http_utils.HandleError(w, r, err)
 		return
 	}
-	w.WriteHeader(http.StatusOK)
-	render.JSON(w, r, u)
+	http_utils.SendJsonResponse(w, r, http.StatusOK, u)
 }
 
 func (c *Users) create(w http.ResponseWriter, r *http.Request) {
@@ -86,8 +84,7 @@ func (c *Users) create(w http.ResponseWriter, r *http.Request) {
 		http_utils.HandleError(w, r, err)
 		return
 	}
-	w.WriteHeader(http.StatusOK)
-	render.JSON(w, r, u)
+	http_utils.SendJsonResponse(w, r, http.StatusOK, u)
 }
 
 func (c *Users) update(w http.ResponseWriter, r *http.Request) {
@@ -116,8 +113,7 @@ func (c *Users) update(w http.ResponseWriter, r *http.Request) {
 		http_utils.HandleError(w, r, err)
 		return
 	}
-	w.WriteHeader(http.StatusOK)
-	render.JSON(w, r, u)
+	http_utils.SendJsonResponse(w, r, http.StatusOK, u)
 }
 
 func (c *Users) delete(w http.ResponseWriter, r *http.Request) {
@@ -135,8 +131,7 @@ func (c *Users) delete(w http.ResponseWriter, r *http.Request) {
 		http_utils.HandleError(w, r, err)
 		return
 	}
-	w.WriteHeader(http.StatusOK)
-	render.JSON(w, r, map[string]string{"message": "deleted"})
+	http_utils.SendJsonResponse(w, r, http.StatusOK, nil)
 }
 
 func (c *Users) login(w http.ResponseWriter, r *http.Request) {
@@ -153,6 +148,5 @@ func (c *Users) login(w http.ResponseWriter, r *http.Request) {
 		http_utils.HandleError(w, r, err)
 		return
 	}
-	w.WriteHeader(http.StatusOK)
-	render.JSON(w, r, map[string]string{"message": "logged in"})
+	http_utils.SendJsonResponse(w, r, http.StatusOK, nil)
 }

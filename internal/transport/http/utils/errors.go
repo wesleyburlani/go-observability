@@ -4,8 +4,6 @@ import (
 	"errors"
 	"net/http"
 
-	"github.com/go-chi/render"
-
 	pkg_errors "github.com/wesleyburlani/go-rest/pkg/errors"
 )
 
@@ -19,8 +17,7 @@ func HandleError(w http.ResponseWriter, r *http.Request, err error) {
 	}
 
 	statusCode := resolveStatusCode(err)
-	w.WriteHeader(statusCode)
-	render.JSON(w, r, ErrorResponse{Error: err.Error()})
+	SendJsonResponse(w, r, statusCode, ErrorResponse{Error: err.Error()})
 }
 
 func resolveStatusCode(err error) int {

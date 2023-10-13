@@ -2,7 +2,7 @@ package users
 
 import "golang.org/x/crypto/bcrypt"
 
-func EncryptPassword(password string) (string, error) {
+func encryptPassword(password string) (string, error) {
 	if password == "" {
 		return "", nil
 	}
@@ -11,6 +11,6 @@ func EncryptPassword(password string) (string, error) {
 	return string(bytes), err
 }
 
-func CompareHashAndPassword(hash string, password string) error {
+func compareHashAndPassword(hash string, password string) error {
 	return bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
 }

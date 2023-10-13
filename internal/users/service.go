@@ -53,7 +53,7 @@ func (s *Service) Login(ctx context.Context, username, password string) error {
 		return pkg_errors.ErrUnauthorized
 	}
 
-	err = CompareHashAndPassword(u.Password, password)
+	err = compareHashAndPassword(u.Password, password)
 	if err != nil {
 		return pkg_errors.ErrUnauthorized
 	}
