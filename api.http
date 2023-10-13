@@ -1,1 +1,21 @@
-GET http://localhost:3000/users/1
+GET http://localhost:3000/users/2
+
+####
+
+POST http://localhost:3000/users
+Content-Type: application/json
+
+{
+  "username": "johndoe3",
+  "email": "john3@doe.com",
+  "password": "12345678"
+}
+###
+
+POST http://localhost:3000/users/login
+Content-Type: application/json
+
+{
+  "username": "johndoe3",
+  "password": "12345678"
+}

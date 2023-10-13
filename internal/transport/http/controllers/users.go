@@ -2,16 +2,13 @@ package controllers
 
 import (
 	"context"
-	"errors"
 	"net/http"
-	"strconv"
 	"time"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/render"
-	"github.com/go-playground/validator/v10"
+	http_utils "github.com/wesleyburlani/go-rest/internal/transport/http/utils"
 	"github.com/wesleyburlani/go-rest/internal/users"
-	pkg_errors "github.com/wesleyburlani/go-rest/pkg/errors"
 	"github.com/wesleyburlani/go-rest/pkg/logger"
 )
 
@@ -20,12 +17,25 @@ type Users struct {
 	logger *logger.Logger
 }
 
-func NewUsers(svc *users.Service, logger *logger.Logger) *Users {
-	return &Users{svc: svc, logger: logger}
+type CreateUserBody struct {
+	Username string `json:"username" validate:"required,min=3,max=20"`
+	Email    string `json:"email" validate:"required,email"`
+	Password string `json:"password" validate:"required,min=8,max=20"`
 }
 
-type HealthGetResponse struct {
-	Status string `json:"status"`
+type UpdateUserBody struct {
+	Username string `json:"username" validate:"omitempty,min=3,max=20"`
+	Email    string `json:"email" validate:"omitempty,email"`
+	Password string `json:"password" validate:"omitempty,min=8,max=20"`
+}
+
+type LoginBody struct {
+	Username string `json:"username" validate:"required,min=3,max=20"`
+	Password string `json:"password" validate:"required,min=8,max=20"`
+}
+
+func NewUsers(svc *users.Service, logger *logger.Logger) *Users {
+	return &Users{svc: svc, logger: logger}
 }
 
 func (c *Users) Router() http.Handler {
@@ -34,6 +44,7 @@ func (c *Users) Router() http.Handler {
 	r.Post("/", c.create)
 	r.Put("/{id}", c.update)
 	r.Delete("/{id}", c.delete)
+	r.Post("/login", c.login)
 	return r
 }
 
@@ -41,50 +52,28 @@ func (c *Users) get(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(r.Context(), time.Second*5)
 	defer cancel()
 
-	strId := chi.URLParam(r, "id")
-
-	id, err := strconv.ParseInt(strId, 10, 64)
+	id, err := http_utils.GetInt64UrlParam(r, "id")
 	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		render.JSON(w, r, map[string]string{"error": "id must be a number"})
+		http_utils.HandleError(w, r, err)
 		return
 	}
 
 	u, err := c.svc.Get(ctx, id)
 	if err != nil {
-		if errors.Is(err, pkg_errors.ErrNotFound) {
-			w.WriteHeader(http.StatusNotFound)
-			render.JSON(w, r, map[string]string{"error": err.Error()})
-			return
-		}
-		w.WriteHeader(http.StatusInternalServerError)
-		render.JSON(w, r, map[string]string{"error": err.Error()})
+		http_utils.HandleError(w, r, err)
 		return
 	}
 	w.WriteHeader(http.StatusOK)
 	render.JSON(w, r, u)
 }
 
-type CreateUserBody struct {
-	Username string `json:"username" validate:"required,min=3,max=20"`
-	Email    string `json:"email" validate:"required,email"`
-	Password string `json:"password" validate:"required,min=8,max=20"`
-}
-
 func (c *Users) create(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(r.Context(), time.Second*5)
 	defer cancel()
 
-	var body CreateUserBody
-	if err := render.DecodeJSON(r.Body, &body); err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		render.JSON(w, r, map[string]string{"error": err.Error()})
-		return
-	}
-
-	if err := validator.New().Struct(body); err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		render.JSON(w, r, map[string]string{"error": err.Error()})
+	body, err := http_utils.ParseBody[CreateUserBody](r)
+	if err != nil {
+		http_utils.HandleError(w, r, err)
 		return
 	}
 
@@ -94,43 +83,26 @@ func (c *Users) create(w http.ResponseWriter, r *http.Request) {
 		Password: body.Password,
 	})
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		render.JSON(w, r, map[string]string{"error": err.Error()})
+		http_utils.HandleError(w, r, err)
 		return
 	}
 	w.WriteHeader(http.StatusOK)
 	render.JSON(w, r, u)
 }
 
-type UpdateUserBody struct {
-	Username string `json:"username" validate:"omitempty,min=3,max=20"`
-	Email    string `json:"email" validate:"omitempty,email"`
-	Password string `json:"password" validate:"omitempty,min=8,max=20"`
-}
-
 func (c *Users) update(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(r.Context(), time.Second*5)
 	defer cancel()
 
-	strId := chi.URLParam(r, "id")
-
-	id, err := strconv.ParseInt(strId, 10, 64)
+	id, err := http_utils.GetInt64UrlParam(r, "id")
 	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		render.JSON(w, r, map[string]string{"error": "id must be a number"})
+		http_utils.HandleError(w, r, err)
 		return
 	}
 
-	var body UpdateUserBody
-	if err := render.DecodeJSON(r.Body, &body); err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		render.JSON(w, r, map[string]string{"error": err.Error()})
-		return
-	}
-
-	if err := validator.New().Struct(body); err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		render.JSON(w, r, map[string]string{"error": err.Error()})
+	body, err := http_utils.ParseBody[UpdateUserBody](r)
+	if err != nil {
+		http_utils.HandleError(w, r, err)
 		return
 	}
 
@@ -141,8 +113,7 @@ func (c *Users) update(w http.ResponseWriter, r *http.Request) {
 		Password: body.Password,
 	})
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		render.JSON(w, r, map[string]string{"error": err.Error()})
+		http_utils.HandleError(w, r, err)
 		return
 	}
 	w.WriteHeader(http.StatusOK)
@@ -153,21 +124,35 @@ func (c *Users) delete(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(r.Context(), time.Second*5)
 	defer cancel()
 
-	strId := chi.URLParam(r, "id")
-
-	id, err := strconv.ParseInt(strId, 10, 64)
+	id, err := http_utils.GetInt64UrlParam(r, "id")
 	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		render.JSON(w, r, map[string]string{"error": "id must be a number"})
+		http_utils.HandleError(w, r, err)
 		return
 	}
 
 	_, err = c.svc.Delete(ctx, id)
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		render.JSON(w, r, map[string]string{"error": err.Error()})
+		http_utils.HandleError(w, r, err)
 		return
 	}
 	w.WriteHeader(http.StatusOK)
 	render.JSON(w, r, map[string]string{"message": "deleted"})
+}
+
+func (c *Users) login(w http.ResponseWriter, r *http.Request) {
+	ctx, cancel := context.WithTimeout(r.Context(), time.Second*5)
+	defer cancel()
+
+	body, err := http_utils.ParseBody[LoginBody](r)
+	if err != nil {
+		http_utils.HandleError(w, r, err)
+		return
+	}
+
+	if err := c.svc.Login(ctx, body.Username, body.Password); err != nil {
+		http_utils.HandleError(w, r, err)
+		return
+	}
+	w.WriteHeader(http.StatusOK)
+	render.JSON(w, r, map[string]string{"message": "logged in"})
 }

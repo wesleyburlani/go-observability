@@ -3,6 +3,7 @@ package users
 import (
 	"context"
 
+	pkg_errors "github.com/wesleyburlani/go-rest/pkg/errors"
 	"github.com/wesleyburlani/go-rest/pkg/logger"
 )
 
@@ -43,4 +44,18 @@ func (s *Service) Update(ctx context.Context, u User) (User, error) {
 func (s *Service) Delete(ctx context.Context, id int64) (User, error) {
 	s.logger.With("user", id).Debug(ctx, "deleting user")
 	return s.repo.Delete(ctx, id)
+}
+
+func (s *Service) Login(ctx context.Context, username, password string) error {
+	s.logger.With("username", username).Debug(ctx, "logging in user")
+	u, err := s.repo.GetByUsername(ctx, username)
+	if err != nil {
+		return pkg_errors.ErrUnauthorized
+	}
+
+	err = CompareHashAndPassword(u.Password, password)
+	if err != nil {
+		return pkg_errors.ErrUnauthorized
+	}
+	return nil
 }

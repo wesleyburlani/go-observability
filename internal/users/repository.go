@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"strings"
 	"time"
 
 	pkg_errors "github.com/wesleyburlani/go-rest/pkg/errors"
@@ -62,12 +63,21 @@ func (r *Repository) Create(ctx context.Context, u User) (User, error) {
 	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
 	defer cancel()
 
+	encryptedPwd, err := EncryptPassword(u.Password)
+
+	if err != nil {
+		return User{}, fmt.Errorf("could not encrypt password: %w", err)
+	}
+
 	nu, err := r.db.Queries.CreateUser(ctx, db.CreateUserParams{
 		Username: u.Username,
 		Email:    u.Email,
-		Password: u.Password,
+		Password: encryptedPwd,
 	})
 	if err != nil {
+		if strings.Contains(err.Error(), "duplicate key value violates unique constraint") {
+			return User{}, fmt.Errorf("%w: user already exists", pkg_errors.ErrConflict)
+		}
 		return User{}, err
 	}
 
@@ -78,11 +88,21 @@ func (r *Repository) Update(ctx context.Context, u User) (User, error) {
 	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
 	defer cancel()
 
+	pwd := sql.NullString{Valid: u.Password != "", String: u.Password}
+
+	if pwd.Valid {
+		encryptedPwd, err := EncryptPassword(u.Password)
+		if err != nil {
+			return User{}, fmt.Errorf("could not encrypt password: %w", err)
+		}
+		pwd = sql.NullString{Valid: true, String: encryptedPwd}
+	}
+
 	nu, err := r.db.Queries.UpdateUser(ctx, db.UpdateUserParams{
 		ID:       u.ID,
 		Username: sql.NullString{Valid: u.Username != "", String: u.Username},
 		Email:    sql.NullString{Valid: u.Email != "", String: u.Email},
-		Password: sql.NullString{Valid: u.Password != "", String: u.Password},
+		Password: pwd,
 	})
 	if err != nil {
 		return User{}, err
