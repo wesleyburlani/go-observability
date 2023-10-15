@@ -6,7 +6,8 @@ import (
 	"time"
 
 	"go.opentelemetry.io/otel"
-	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracehttp"
+	"go.opentelemetry.io/otel/exporters/otlp/otlpmetric/otlpmetricgrpc"
+	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc"
 	"go.opentelemetry.io/otel/sdk/metric"
 	"go.opentelemetry.io/otel/sdk/resource"
 	"go.opentelemetry.io/otel/sdk/trace"
@@ -18,7 +19,6 @@ type OtelConfig struct {
 	ServiceVersion           string
 	OtelExporterOtlpEndpoint string
 	OtelExporterOtlpInsecure bool
-	OtelExporterOtlpUrlPath  string
 }
 
 // setupOTelSDK bootstraps the OpenTelemetry pipeline.
@@ -60,7 +60,7 @@ func SetupOtel(ctx context.Context, config OtelConfig) (shutdown func(context.Co
 	otel.SetTracerProvider(tracerProvider)
 
 	// Setup meter provider.
-	meterProvider, err := newMeterProvider(res)
+	meterProvider, err := newMeterProvider(ctx, config, res)
 	if err != nil {
 		handleErr(err)
 		return
@@ -80,21 +80,17 @@ func newResource(config OtelConfig) (*resource.Resource, error) {
 }
 
 func newTraceProvider(ctx context.Context, config OtelConfig, res *resource.Resource) (*trace.TracerProvider, error) {
-	options := []otlptracehttp.Option{}
+	options := []otlptracegrpc.Option{}
 
 	if config.OtelExporterOtlpEndpoint != "" {
-		options = append(options, otlptracehttp.WithEndpoint(config.OtelExporterOtlpEndpoint))
-	}
-
-	if config.OtelExporterOtlpUrlPath != "" {
-		options = append(options, otlptracehttp.WithURLPath(config.OtelExporterOtlpUrlPath))
+		options = append(options, otlptracegrpc.WithEndpoint(config.OtelExporterOtlpEndpoint))
 	}
 
 	if config.OtelExporterOtlpInsecure {
-		options = append(options, otlptracehttp.WithInsecure())
+		options = append(options, otlptracegrpc.WithInsecure())
 	}
 
-	traceExporter, err := otlptracehttp.New(ctx, options...)
+	traceExporter, err := otlptracegrpc.New(ctx, options...)
 	if err != nil {
 		return nil, err
 	}
@@ -108,9 +104,27 @@ func newTraceProvider(ctx context.Context, config OtelConfig, res *resource.Reso
 	return traceProvider, nil
 }
 
-func newMeterProvider(res *resource.Resource) (*metric.MeterProvider, error) {
+func newMeterProvider(ctx context.Context, config OtelConfig, res *resource.Resource) (*metric.MeterProvider, error) {
+	options := []otlpmetricgrpc.Option{}
+
+	if config.OtelExporterOtlpEndpoint != "" {
+		options = append(options, otlpmetricgrpc.WithEndpoint(config.OtelExporterOtlpEndpoint))
+	}
+
+	if config.OtelExporterOtlpInsecure {
+		options = append(options, otlpmetricgrpc.WithInsecure())
+	}
+	metricExp, err := otlpmetricgrpc.New(ctx, options...)
+	if err != nil {
+		return nil, err
+	}
+
 	meterProvider := metric.NewMeterProvider(
 		metric.WithResource(res),
+		metric.WithReader(metric.NewPeriodicReader(metricExp,
+			// Default is 1m. Set to 3s for demonstrative purposes.
+			metric.WithInterval(3*time.Second))),
 	)
+	otel.SetMeterProvider(meterProvider)
 	return meterProvider, nil
 }

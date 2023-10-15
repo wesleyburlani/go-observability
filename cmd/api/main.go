@@ -24,7 +24,6 @@ func main() {
 		ServiceVersion:           cfg.ServiceVersion,
 		OtelExporterOtlpEndpoint: cfg.OtelExporterOtlpEndpoint,
 		OtelExporterOtlpInsecure: cfg.OtelExporterOtlpInsecure,
-		OtelExporterOtlpUrlPath:  cfg.OtelExporterOtlpUrlPath,
 	})
 	utils.PanicOnNotNil(err)
 
