@@ -2,7 +2,7 @@
 test:
 	ENV=test go test -v ./...
 build:
-	make -B generate-db-client && make -B swagger && go build -o bin/api cmd/api/main.go
+	make -B generate-db-client && go build -o bin/api cmd/api/main.go
 # deletes the contents of bin/ folder
 clean:
 	rm -Rf bin/*

@@ -12,6 +12,96 @@ services:
     volumes:
       - ./scripts/create-multiple-postgresql-databases.sh:/docker-entrypoint-initdb.d/create-multiple-postgresql-databases.sh
       - db:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -d go-api -U postgres"]
+      interval: 3s
+      timeout: 5s
+      retries: 5
+    networks:
+      - app_net
+
+  db_ui:
+    image: sosedoff/pgweb:0.13.1
+    depends_on:
+      database:
+        condition: service_healthy
+    ports:
+      - "8081:8081"
+    environment:
+      - PGWEB_DATABASE_URL=postgresql://postgres:postgres@database:5432/go-api?sslmode=disable
+    networks:
+      - app_net
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:3000"
+    depends_on:
+      database:
+        condition: service_healthy
+      kafka:
+        condition: service_completed_successfully
+    networks:
+      - app_net
+
+  air_api:
+    image: cosmtrek/air
+    working_dir: /app
+    ports:
+      - "3000:3000"
+    healthcheck:
+      test: curl -fsS localhost:3000/health
+    volumes:
+      - ./:/app
+    depends_on:
+      database:
+        condition: service_healthy
+    networks:
+    - app_net
+
+  zookeeper:
+    image: confluentinc/cp-zookeeper:latest
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+    networks:
+      - app_net
+
+  kafka:
+    image: confluentinc/cp-kafka:latest
+    depends_on:
+      - zookeeper
+    ports:
+      - "9092:9092"
+      - "9094:9094"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
+      KAFKA_LISTENERS: INTERNAL://:9092,OUTSIDE://:9094
+      KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka:9092,OUTSIDE://host.docker.internal:9094
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,OUTSIDE:PLAINTEXT
+    extra_hosts:
+      - "host.docker.internal:172.17.0.1"
+    networks:
+      - app_net
+
+  control-center:
+    image: confluentinc/cp-enterprise-control-center:6.0.1
+    hostname: control-center
+    depends_on:
+      - kafka
+    ports:
+      - "9021:9021"
+    environment:
+      CONTROL_CENTER_BOOTSTRAP_SERVERS: 'kafka:9092'
+      CONTROL_CENTER_REPLICATION_FACTOR: 1
+      PORT: 9021
+    networks:
+      - app_net
+
   jaeger-all-in-one:
     image: jaegertracing/all-in-one:latest
     ports:
@@ -23,6 +113,8 @@ services:
       - "14268:14268"
       - "9411:9411"
       - "14250:14250"
+    networks:
+      - app_net
 
   otel-collector:
     image: otel/opentelemetry-collector-contrib:0.53.0
@@ -38,6 +130,8 @@ services:
       - "55679:55679" # zpages extension
     depends_on:
       - jaeger-all-in-one
+    networks:
+      - app_net
 
   prometheus:
     image: prom/prometheus:latest
@@ -46,6 +140,11 @@ services:
       - ./prometheus.yaml:/etc/prometheus/prometheus.yml
     ports:
       - "9090:9090"
+    networks:
+      - app_net
 
 volumes:
   db:
+networks:
+  app_net:
+    driver: bridge
