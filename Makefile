@@ -1,9 +1,7 @@
-# execute all tests on the repository
 test:
-	ENV=test go test -v ./...
+	docker compose exec api go test -v ./...
 build:
-	make -B generate-db-client && go build -o bin/api cmd/api/main.go
-# deletes the contents of bin/ folder
+	go build -o bin/api cmd/api/main.go
 clean:
 	rm -Rf bin/*
 migrations-up:

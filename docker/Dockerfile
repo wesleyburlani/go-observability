@@ -4,11 +4,13 @@ WORKDIR /app
 COPY . .
 RUN sqlc generate
 
-FROM golang:1.21 as builder
+FROM golang:1.21 as vendor
 COPY --from=sqlc-generate /app /app
 WORKDIR /app
 RUN go get -d -v ./...
-RUN CGO_ENABLED=0 GOOS=linux go build -o bin/api cmd/api/main.go
+
+FROM vendor as builder
+RUN CGO_ENABLED=0 GOOS=linux make build
 
 FROM scratch
 WORKDIR /app/bin

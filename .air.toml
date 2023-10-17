@@ -5,7 +5,7 @@ tmp_dir = "tmp"
 [build]
   args_bin = []
   bin = "./bin/api"
-  cmd = "CGO_ENABLED=0 GOOS=linux go build -o bin/api cmd/api/main.go"
+  cmd = "CGO_ENABLED=0 GOOS=linux make build"
   delay = 1000
   exclude_dir = ["assets", "tmp", "vendor", "testdata"]
   exclude_file = []
