@@ -48,6 +48,8 @@ services:
 
   air_api:
     image: cosmtrek/air
+    labels:
+      logging: "promtail"
     working_dir: /app
     ports:
       - "3000:3000"
@@ -154,8 +156,42 @@ services:
     networks:
       - app_net
 
+  loki:
+    image: grafana/loki:latest
+    ports:
+      - "3100:3100"
+    command: -config.file=/etc/loki/local-config.yaml
+    networks:
+      - app_net
+
+  promtail:
+    image: grafana/promtail:latest
+    volumes:
+      - ./docker/promtail/config.yaml:/etc/promtail/docker-config.yaml
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - /var/run/docker.sock:/var/run/docker.sock
+    command: -config.file=/etc/promtail/docker-config.yaml
+    networks:
+      - app_net
+
+  grafana:
+    image: grafana/grafana:latest
+    environment:
+      - GF_AUTH_ANONYMOUS_ENABLED=true
+      - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
+      - GF_AUTH_DISABLE_LOGIN_FORM=true
+    ports:
+      - 3001:3000
+    restart: unless-stopped
+    volumes:
+      - ./docker/grafana/provisioning/datasources:/etc/grafana/provisioning/datasources
+      - grafana-data:/var/lib/grafana
+    networks:
+      - app_net
+
 volumes:
   db:
+  grafana-data:
 networks:
   app_net:
     driver: bridge
