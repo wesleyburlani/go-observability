@@ -3,7 +3,7 @@ WORKDIR /app
 COPY . .
 WORKDIR /app/cmd/api
 RUN go get -d -v ./...
-RUN CGO_ENABLED=0 GOOS=linux go build -o api .
+RUN CGO_ENABLED=0 GOOS=linux make build
 
 FROM scratch
 WORKDIR /

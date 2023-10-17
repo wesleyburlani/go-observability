@@ -35,7 +35,7 @@ services:
   api:
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: docker/development.dockerfile
     ports:
       - "8080:3000"
     depends_on:
