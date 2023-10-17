@@ -33,20 +33,6 @@ services:
       - app_net
 
   api:
-    build:
-      context: .
-      dockerfile: docker/development.dockerfile
-    ports:
-      - "8080:3000"
-    depends_on:
-      database:
-        condition: service_healthy
-      kafka:
-        condition: service_completed_successfully
-    networks:
-      - app_net
-
-  air_api:
     image: cosmtrek/air
     labels:
       logging: "promtail"

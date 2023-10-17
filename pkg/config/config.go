@@ -12,12 +12,9 @@ func LoadDotEnvConfig[T interface{}](path string) (T, error) {
 
 	viper.AutomaticEnv()
 
-	err := viper.ReadInConfig()
-	if err != nil {
-		return config, err
-	}
+	viper.ReadInConfig()
 
-	err = viper.Unmarshal(&config)
+	err := viper.Unmarshal(&config)
 
 	if err != nil {
 		return config, err
