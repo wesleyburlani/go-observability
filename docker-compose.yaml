@@ -59,7 +59,7 @@ services:
       database:
         condition: service_healthy
     networks:
-    - app_net
+      - app_net
 
   zookeeper:
     image: confluentinc/cp-zookeeper:latest
@@ -85,6 +85,17 @@ services:
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,OUTSIDE:PLAINTEXT
     extra_hosts:
       - "host.docker.internal:172.17.0.1"
+    networks:
+      - app_net
+
+  kafka-topics-generator:
+    image: confluentinc/cp-kafka:latest
+    depends_on:
+      - kafka
+    command: >
+      bash -c
+        "sleep 5s &&
+        kafka-topics --create --topic=users --if-not-exists --bootstrap-server=kafka:9092"
     networks:
       - app_net
 
