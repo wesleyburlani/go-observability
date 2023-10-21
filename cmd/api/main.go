@@ -2,12 +2,14 @@ package main
 
 import (
 	"context"
+	"net"
 	"net/http"
 	"os"
 	"sync"
 
 	"github.com/wesleyburlani/go-rest/internal/config"
 	"github.com/wesleyburlani/go-rest/internal/di"
+	"github.com/wesleyburlani/go-rest/internal/transport/grpc"
 	_http "github.com/wesleyburlani/go-rest/internal/transport/http"
 	"github.com/wesleyburlani/go-rest/pkg/logger"
 	"github.com/wesleyburlani/go-rest/pkg/observability"
@@ -38,17 +40,32 @@ func main() {
 	err = container.Invoke(func(c *config.Config, l *logger.Logger) {
 		var wg sync.WaitGroup
 		wg.Add(1)
-		addr := c.HttpAddress
+		httpAddr := c.HttpAddress
+		grpcAddr := ":4000"
 		go func() {
 			defer wg.Done()
-			app := _http.CreateApp(container)
-			err = http.ListenAndServe(addr, app)
+			grpcServer := grpc.CreateGrpcServer(container)
+			listener, err := net.Listen("tcp", grpcAddr)
 			if err != nil {
-				l.With("address", addr, "error", err).Error(ctx, "error starting http server")
+				l.With("address", grpcAddr, "error", err).Error(ctx, "error starting grpc server")
+			}
+			err = grpcServer.Serve(listener)
+			if err != nil {
+				l.With("address", grpcAddr, "error", err).Error(ctx, "error starting grpc server")
 				os.Exit(1)
 			}
 		}()
-		l.With("address", addr).Info(ctx, "server started")
+		go func() {
+			defer wg.Done()
+			app := _http.CreateApp(container)
+			err = http.ListenAndServe(httpAddr, app)
+			if err != nil {
+				l.With("address", httpAddr, "error", err).Error(ctx, "error starting http server")
+				os.Exit(1)
+			}
+		}()
+		l.With("address", grpcAddr).Info(ctx, "grpc server started")
+		l.With("address", httpAddr).Info(ctx, "http server started")
 		wg.Wait()
 	})
 	utils.PanicOnNotNil(err)

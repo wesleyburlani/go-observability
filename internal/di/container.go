@@ -5,6 +5,7 @@ import (
 
 	"github.com/wesleyburlani/go-rest/internal/config"
 	"github.com/wesleyburlani/go-rest/internal/db"
+	"github.com/wesleyburlani/go-rest/internal/transport/grpc"
 	http_controllers "github.com/wesleyburlani/go-rest/internal/transport/http/controllers"
 	"github.com/wesleyburlani/go-rest/internal/users"
 	pkg_http "github.com/wesleyburlani/go-rest/pkg/http"
@@ -41,6 +42,7 @@ func BuildContainer(c *config.Config) (*di.Container, error) {
 		di.Provide(users.NewRepository),
 		di.Provide(users.NewService),
 		di.Provide(http_controllers.NewUsers, di.As(new(pkg_http.Controller))),
+		di.Provide(grpc.NewUserServiceGrpc),
 	)
 
 	container, err := di.New(general, storage, observability, users)
