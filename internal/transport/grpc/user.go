@@ -3,7 +3,7 @@ package grpc
 import (
 	"context"
 
-	pb "github.com/wesleyburlani/go-rest/internal/transport/grpc/protofiles"
+	pb "github.com/wesleyburlani/go-rest/internal/transport/grpc/pb"
 	"github.com/wesleyburlani/go-rest/internal/users"
 )
 

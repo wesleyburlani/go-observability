@@ -2,7 +2,7 @@ package grpc
 
 import (
 	"github.com/defval/di"
-	pb "github.com/wesleyburlani/go-rest/internal/transport/grpc/protofiles"
+	pb "github.com/wesleyburlani/go-rest/internal/transport/grpc/pb"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 )
