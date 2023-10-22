@@ -3,8 +3,8 @@ package grpc
 import (
 	"context"
 
-	pb "github.com/wesleyburlani/go-rest/internal/transport/grpc/pb"
-	"github.com/wesleyburlani/go-rest/internal/users"
+	pb "github.com/wesleyburlani/go-observability/internal/transport/grpc/pb"
+	"github.com/wesleyburlani/go-observability/internal/users"
 )
 
 type UserServiceGrpc struct {

@@ -7,9 +7,9 @@ import (
 	"strings"
 	"time"
 
-	pkg_errors "github.com/wesleyburlani/go-rest/pkg/errors"
+	pkg_errors "github.com/wesleyburlani/go-observability/pkg/errors"
 
-	"github.com/wesleyburlani/go-rest/internal/db"
+	"github.com/wesleyburlani/go-observability/internal/db"
 )
 
 type Repository struct {

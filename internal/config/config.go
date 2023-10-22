@@ -1,7 +1,7 @@
 package config
 
 import (
-	pkg_config "github.com/wesleyburlani/go-rest/pkg/config"
+	pkg_config "github.com/wesleyburlani/go-observability/pkg/config"
 )
 
 type Config struct {

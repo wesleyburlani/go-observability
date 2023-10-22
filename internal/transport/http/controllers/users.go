@@ -6,9 +6,9 @@ import (
 	"time"
 
 	"github.com/go-chi/chi/v5"
-	http_utils "github.com/wesleyburlani/go-rest/internal/transport/http/utils"
-	"github.com/wesleyburlani/go-rest/internal/users"
-	"github.com/wesleyburlani/go-rest/pkg/logger"
+	http_utils "github.com/wesleyburlani/go-observability/internal/transport/http/utils"
+	"github.com/wesleyburlani/go-observability/internal/users"
+	"github.com/wesleyburlani/go-observability/pkg/logger"
 )
 
 type Users struct {

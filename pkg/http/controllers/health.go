@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/wesleyburlani/go-rest/pkg/logger"
+	"github.com/wesleyburlani/go-observability/pkg/logger"
 )
 
 type Health struct {

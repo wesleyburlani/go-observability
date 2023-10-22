@@ -19,7 +19,7 @@ import (
 const _ = grpc.SupportPackageIsVersion7
 
 const (
-	UserService_CreateUser_FullMethodName = "/github.com.wesleyburlani.gorest.UserService/CreateUser"
+	UserService_CreateUser_FullMethodName = "/github.com.wesleyburlani.goobservability.UserService/CreateUser"
 )
 
 // UserServiceClient is the client API for UserService service.
@@ -96,7 +96,7 @@ func _UserService_CreateUser_Handler(srv interface{}, ctx context.Context, dec f
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var UserService_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "github.com.wesleyburlani.gorest.UserService",
+	ServiceName: "github.com.wesleyburlani.goobservability.UserService",
 	HandlerType: (*UserServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{

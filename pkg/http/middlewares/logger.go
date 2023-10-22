@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/wesleyburlani/go-rest/pkg/logger"
+	"github.com/wesleyburlani/go-observability/pkg/logger"
 )
 
 type Logger struct {

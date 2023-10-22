@@ -3,8 +3,8 @@ package users
 import (
 	"context"
 
-	pkg_errors "github.com/wesleyburlani/go-rest/pkg/errors"
-	"github.com/wesleyburlani/go-rest/pkg/logger"
+	pkg_errors "github.com/wesleyburlani/go-observability/pkg/errors"
+	"github.com/wesleyburlani/go-observability/pkg/logger"
 )
 
 type Service struct {

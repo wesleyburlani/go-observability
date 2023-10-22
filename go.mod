@@ -1,4 +1,4 @@
-module github.com/wesleyburlani/go-rest
+module github.com/wesleyburlani/go-observability
 
 go 1.21
 

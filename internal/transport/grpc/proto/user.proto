@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package github.com.wesleyburlani.gorest;
+package github.com.wesleyburlani.goobservability;
 
 option go_package = "/pb";
 

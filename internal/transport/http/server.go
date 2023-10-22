@@ -6,10 +6,10 @@ import (
 	"github.com/defval/di"
 	"github.com/go-chi/chi/v5"
 	"github.com/riandyrn/otelchi"
-	"github.com/wesleyburlani/go-rest/internal/config"
-	"github.com/wesleyburlani/go-rest/internal/transport/http/controllers"
-	pkg_http_controllers "github.com/wesleyburlani/go-rest/pkg/http/controllers"
-	pkg_http_middlewares "github.com/wesleyburlani/go-rest/pkg/http/middlewares"
+	"github.com/wesleyburlani/go-observability/internal/config"
+	"github.com/wesleyburlani/go-observability/internal/transport/http/controllers"
+	pkg_http_controllers "github.com/wesleyburlani/go-observability/pkg/http/controllers"
+	pkg_http_middlewares "github.com/wesleyburlani/go-observability/pkg/http/middlewares"
 )
 
 func CreateApp(c *di.Container) http.Handler {

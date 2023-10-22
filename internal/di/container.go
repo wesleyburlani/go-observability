@@ -3,16 +3,16 @@ package di
 import (
 	"github.com/defval/di"
 
-	"github.com/wesleyburlani/go-rest/internal/config"
-	"github.com/wesleyburlani/go-rest/internal/db"
-	"github.com/wesleyburlani/go-rest/internal/transport/grpc"
-	http_controllers "github.com/wesleyburlani/go-rest/internal/transport/http/controllers"
-	"github.com/wesleyburlani/go-rest/internal/users"
-	pkg_http "github.com/wesleyburlani/go-rest/pkg/http"
-	pkg_http_controllers "github.com/wesleyburlani/go-rest/pkg/http/controllers"
-	pkg_http_middlewares "github.com/wesleyburlani/go-rest/pkg/http/middlewares"
-	"github.com/wesleyburlani/go-rest/pkg/logger"
-	"github.com/wesleyburlani/go-rest/pkg/utils"
+	"github.com/wesleyburlani/go-observability/internal/config"
+	"github.com/wesleyburlani/go-observability/internal/db"
+	"github.com/wesleyburlani/go-observability/internal/transport/grpc"
+	http_controllers "github.com/wesleyburlani/go-observability/internal/transport/http/controllers"
+	"github.com/wesleyburlani/go-observability/internal/users"
+	pkg_http "github.com/wesleyburlani/go-observability/pkg/http"
+	pkg_http_controllers "github.com/wesleyburlani/go-observability/pkg/http/controllers"
+	pkg_http_middlewares "github.com/wesleyburlani/go-observability/pkg/http/middlewares"
+	"github.com/wesleyburlani/go-observability/pkg/logger"
+	"github.com/wesleyburlani/go-observability/pkg/utils"
 )
 
 func BuildContainer(c *config.Config) (*di.Container, error) {

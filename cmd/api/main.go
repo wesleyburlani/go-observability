@@ -7,13 +7,13 @@ import (
 	"os"
 	"sync"
 
-	"github.com/wesleyburlani/go-rest/internal/config"
-	"github.com/wesleyburlani/go-rest/internal/di"
-	"github.com/wesleyburlani/go-rest/internal/transport/grpc"
-	_http "github.com/wesleyburlani/go-rest/internal/transport/http"
-	"github.com/wesleyburlani/go-rest/pkg/logger"
-	"github.com/wesleyburlani/go-rest/pkg/observability"
-	"github.com/wesleyburlani/go-rest/pkg/utils"
+	"github.com/wesleyburlani/go-observability/internal/config"
+	"github.com/wesleyburlani/go-observability/internal/di"
+	"github.com/wesleyburlani/go-observability/internal/transport/grpc"
+	_http "github.com/wesleyburlani/go-observability/internal/transport/http"
+	"github.com/wesleyburlani/go-observability/pkg/logger"
+	"github.com/wesleyburlani/go-observability/pkg/observability"
+	"github.com/wesleyburlani/go-observability/pkg/utils"
 )
 
 func main() {

@@ -8,7 +8,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/render"
 	"github.com/go-playground/validator/v10"
-	pkg_errors "github.com/wesleyburlani/go-rest/pkg/errors"
+	pkg_errors "github.com/wesleyburlani/go-observability/pkg/errors"
 )
 
 func GetStringUrlParam(r *http.Request, key string) (string, error) {

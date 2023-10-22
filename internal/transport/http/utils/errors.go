@@ -4,7 +4,7 @@ import (
 	"errors"
 	"net/http"
 
-	pkg_errors "github.com/wesleyburlani/go-rest/pkg/errors"
+	pkg_errors "github.com/wesleyburlani/go-observability/pkg/errors"
 )
 
 type ErrorResponse struct {
