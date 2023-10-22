@@ -39,6 +39,7 @@ services:
     working_dir: /app
     ports:
       - "3000:3000"
+      - "4000:4000"
     healthcheck:
       test: curl -fsS localhost:3000/health
     volumes:

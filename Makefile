@@ -1,18 +1,20 @@
 test:
-	docker compose exec api go test -v ./...
+	go test -v ./...
 build:
-	docker compose exec tools go build -o bin/api cmd/api/main.go
+	go build -o bin/api cmd/api/main.go
 clean:
 	rm -Rf bin/*
 migrations-up:
-	docker compose exec tools ./scripts/migrations-up.sh
+	./scripts/migrations-up.sh
 migrations-down:
-	docker compose exec tools ./scripts/migrations-down.sh
+	./scripts/migrations-down.sh
 generate-db-client:
-	docker compose exec tools sqlc generate
+	sqlc generate
 generate-proto:
-	docker compose exec tools protoc \
+	protoc \
 		--proto_path=./internal/transport/grpc/proto \
 		--go_out=./internal/transport/grpc \
 		--go-grpc_out=./internal/transport/grpc \
 		./internal/transport/grpc/proto/*.proto
+grpc-client:
+	evans ./internal/transport/grpc/proto/*.proto --host api --port 4000
