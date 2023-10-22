@@ -11,6 +11,7 @@ import (
 	"github.com/wesleyburlani/go-observability/internal/di"
 	"github.com/wesleyburlani/go-observability/internal/transport/grpc"
 	_http "github.com/wesleyburlani/go-observability/internal/transport/http"
+	"github.com/wesleyburlani/go-observability/internal/transport/kafka"
 	"github.com/wesleyburlani/go-observability/pkg/logger"
 	"github.com/wesleyburlani/go-observability/pkg/observability"
 	"github.com/wesleyburlani/go-observability/pkg/utils"
@@ -41,7 +42,7 @@ func main() {
 		var wg sync.WaitGroup
 		wg.Add(1)
 		httpAddr := c.HttpAddress
-		grpcAddr := ":4000"
+		grpcAddr := c.GrpcAddress
 		go func() {
 			defer wg.Done()
 			grpcServer := grpc.CreateGrpcServer(container)
@@ -62,6 +63,29 @@ func main() {
 			if err != nil {
 				l.With("address", httpAddr, "error", err).Error(ctx, "error starting http server")
 				os.Exit(1)
+			}
+		}()
+		go func() {
+			defer wg.Done()
+			consumer, err := kafka.CreateConsumer(container)
+			if err != nil {
+				l.With("error", err).Error(ctx, "error starting kafka consumer")
+				os.Exit(1)
+			}
+			err = consumer.SubscribeTopics([]string{"users"}, nil)
+			if err != nil {
+				l.With("error", err).Error(ctx, "error subscribing to kafka topic")
+				os.Exit(1)
+			}
+			l.With("topic", "users").Info(ctx, "subscribed to kafka topic")
+			l.Info(ctx, "kafka consumer started")
+			for {
+				msg, err := consumer.ReadMessage(-1)
+				if err == nil {
+					l.With("message", string(msg.Value)).Info(ctx, "kafka message received")
+				} else {
+					l.With("error", err).Error(ctx, "error reading kafka message")
+				}
 			}
 		}()
 		l.With("address", grpcAddr).Info(ctx, "grpc server started")

@@ -10,6 +10,8 @@ type Config struct {
 	LogEnabled               bool   `mapstructure:"LOG_ENABLED"`
 	LogLevel                 string `mapstructure:"LOG_LEVEL" validate:"required"`
 	HttpAddress              string `mapstructure:"HTTP_ADDRESS" validate:"required"`
+	GrpcAddress              string `mapstructure:"GRPC_ADDRESS" validate:"required"`
+	KafkaHosts               string `mapstructure:"KAFKA_HOSTS" validate:"required"`
 	OtelExporterOtlpEndpoint string `mapstructure:"OTEL_EXPORTER_OTLP_ENDPOINT"`
 	OtelExporterOtlpInsecure bool   `mapstructure:"OTEL_EXPORTER_OTLP_INSECURE"`
 	DatabaseUrl              string `mapstructure:"DATABASE_URL" validate:"required"`
