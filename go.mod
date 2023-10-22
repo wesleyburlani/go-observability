@@ -3,6 +3,7 @@ module github.com/wesleyburlani/go-observability
 go 1.21
 
 require (
+	github.com/confluentinc/confluent-kafka-go/v2 v2.2.0
 	github.com/defval/di v1.12.0
 	github.com/go-chi/chi/v5 v5.0.10
 	github.com/go-chi/render v1.0.3

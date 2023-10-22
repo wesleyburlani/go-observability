@@ -12,9 +12,9 @@ generate-db-client:
 	sqlc generate
 generate-proto:
 	protoc \
-		--proto_path=./internal/transport/grpc/proto \
+		--proto_path=./protofiles \
 		--go_out=./internal/transport/grpc \
 		--go-grpc_out=./internal/transport/grpc \
-		./internal/transport/grpc/proto/*.proto
+		./protofiles/*.proto
 grpc-client:
-	evans ./internal/transport/grpc/proto/*.proto --host api --port 4000
+	evans ./protofiles/*.proto --host api --port 4000

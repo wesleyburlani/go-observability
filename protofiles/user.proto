@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+package "github.com.wesleyburlani.goobservability";
+
+option go_package = "/pb";
+
+message CreateUserRequest {
+  string username = 2;
+  string email = 3;
+  string password = 4;
+}
+
+message UserResponse {
+  int64 id = 1;
+  string username = 2;
+  string email = 3;
+}
+
+message GetUserRequest {
+  int64 id = 1;
+}
+
+service UserService {
+  rpc CreateUser(CreateUserRequest) returns (UserResponse);
+  rpc GetUser(GetUserRequest) returns (UserResponse);
+}

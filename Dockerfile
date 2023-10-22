@@ -10,7 +10,7 @@ WORKDIR /app
 RUN go get -d -v ./...
 
 FROM vendor as builder
-RUN CGO_ENABLED=0 GOOS=linux make build
+RUN CGO_ENABLED=1 GOOS=linux make build
 
 FROM scratch
 WORKDIR /app/bin
