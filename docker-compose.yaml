@@ -49,6 +49,15 @@ services:
     networks:
       - app_net
 
+  tools:
+    build:
+      context: .
+      dockerfile: ./docker/Dockerfile
+    volumes:
+      - .:/go/src/
+    networks:
+      - app_net
+
   zookeeper:
     image: confluentinc/cp-zookeeper:latest
     environment:

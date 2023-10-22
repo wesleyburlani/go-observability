@@ -8,6 +8,7 @@ import (
 )
 
 type UserServiceGrpc struct {
+	pb.UnimplementedUserServiceServer
 	svc *users.Service
 }
 

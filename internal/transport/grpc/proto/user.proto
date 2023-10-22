@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package github.com.wesleyburlani.gorest;
 
-option go_package = "pb;pb";
+option go_package = "/pb";
 
 message CreateUserRequest {
   string username = 2;

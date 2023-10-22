@@ -7,4 +7,4 @@ source "$local_dir/utils.sh"
 load_env_vars
 
 echo "Running migrations down on $ENV environment..."
-docker run -v "$root_dir/sql/migrations":/migrations --network go-api_app_net migrate/migrate -path=/migrations/ -database $DATABASE_URL down -all
+migrate -source "file://./sql/migrations" -database $DATABASE_URL down -all
