@@ -11,10 +11,6 @@ import (
 	"github.com/wesleyburlani/go-observability/pkg/logger"
 )
 
-type KafkaMessage struct {
-	Command string `json:"command"`
-}
-
 func StartConsume(ctx context.Context, c *di.Container) error {
 	err := c.Invoke(func(config *config.Config, l *logger.Logger) {
 		consumer, err := ckafka.NewConsumer(&ckafka.ConfigMap{
