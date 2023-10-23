@@ -7,6 +7,7 @@ import (
 	"github.com/wesleyburlani/go-observability/internal/db"
 	"github.com/wesleyburlani/go-observability/internal/transport/grpc"
 	http_controllers "github.com/wesleyburlani/go-observability/internal/transport/http/controllers"
+	"github.com/wesleyburlani/go-observability/internal/transport/kafka/handlers"
 	"github.com/wesleyburlani/go-observability/internal/users"
 	pkg_http "github.com/wesleyburlani/go-observability/pkg/http"
 	pkg_http_controllers "github.com/wesleyburlani/go-observability/pkg/http/controllers"
@@ -43,6 +44,7 @@ func BuildContainer(c *config.Config) (*di.Container, error) {
 		di.Provide(users.NewService),
 		di.Provide(http_controllers.NewUsers, di.As(new(pkg_http.Controller))),
 		di.Provide(grpc.NewUserServiceGrpc),
+		di.Provide(handlers.NewUserTopicHandler),
 	)
 
 	container, err := di.New(general, storage, observability, users)

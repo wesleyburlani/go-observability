@@ -67,25 +67,10 @@ func main() {
 		}()
 		go func() {
 			defer wg.Done()
-			consumer, err := kafka.CreateConsumer(container)
+			err := kafka.StartConsume(ctx, container)
 			if err != nil {
 				l.With("error", err).Error(ctx, "error starting kafka consumer")
 				os.Exit(1)
-			}
-			err = consumer.SubscribeTopics([]string{"users"}, nil)
-			if err != nil {
-				l.With("error", err).Error(ctx, "error subscribing to kafka topic")
-				os.Exit(1)
-			}
-			l.With("topic", "users").Info(ctx, "subscribed to kafka topic")
-			l.Info(ctx, "kafka consumer started")
-			for {
-				msg, err := consumer.ReadMessage(-1)
-				if err == nil {
-					l.With("message", string(msg.Value)).Info(ctx, "kafka message received")
-				} else {
-					l.With("error", err).Error(ctx, "error reading kafka message")
-				}
 			}
 		}()
 		l.With("address", grpcAddr).Info(ctx, "grpc server started")
