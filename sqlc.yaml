@@ -5,5 +5,5 @@ sql:
     schema: "sql/migrations"
     gen:
       go:
-        package: "db"
+        package: "postgres"
         out: "internal/ports/postgres"

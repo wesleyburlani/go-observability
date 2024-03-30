@@ -7,7 +7,7 @@ import (
 	"github.com/wesleyburlani/go-observability/internal/ports/grpc"
 	http_controllers "github.com/wesleyburlani/go-observability/internal/ports/http/controllers"
 	"github.com/wesleyburlani/go-observability/internal/ports/kafka/handlers"
-	db "github.com/wesleyburlani/go-observability/internal/ports/postgres"
+	"github.com/wesleyburlani/go-observability/internal/ports/postgres"
 	"github.com/wesleyburlani/go-observability/internal/ports/postgres/repositories"
 	"github.com/wesleyburlani/go-observability/internal/users"
 	pkg_http "github.com/wesleyburlani/go-observability/pkg/http"
@@ -28,8 +28,8 @@ func BuildContainer(c *config.Config) (*di.Container, error) {
 	)
 
 	storage := di.Options(
-		di.Provide(func() *db.Database {
-			d, err := db.NewDatabase(c.DatabaseUrl)
+		di.Provide(func() *postgres.Database {
+			d, err := postgres.NewDatabase(c.DatabaseUrl)
 			utils.PanicOnNotNil(err)
 			return d
 		}),

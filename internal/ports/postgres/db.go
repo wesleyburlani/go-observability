@@ -2,7 +2,7 @@
 // versions:
 //   sqlc v1.22.0
 
-package db
+package postgres
 
 import (
 	"context"

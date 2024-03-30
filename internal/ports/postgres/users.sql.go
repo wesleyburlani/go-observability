@@ -3,7 +3,7 @@
 //   sqlc v1.22.0
 // source: users.sql
 
-package db
+package postgres
 
 import (
 	"context"

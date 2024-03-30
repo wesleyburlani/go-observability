@@ -7,16 +7,16 @@ import (
 	"strings"
 	"time"
 
-	db "github.com/wesleyburlani/go-observability/internal/ports/postgres"
+	"github.com/wesleyburlani/go-observability/internal/ports/postgres"
 	"github.com/wesleyburlani/go-observability/internal/users"
 	pkg_errors "github.com/wesleyburlani/go-observability/pkg/errors"
 )
 
 type UserRepository struct {
-	db *db.Database
+	db *postgres.Database
 }
 
-func NewUserRepository(db *db.Database) *UserRepository {
+func NewUserRepository(db *postgres.Database) *UserRepository {
 	return &UserRepository{db: db}
 }
 
@@ -63,7 +63,7 @@ func (r *UserRepository) Create(ctx context.Context, u users.User) (users.User, 
 	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
 	defer cancel()
 
-	nu, err := r.db.Queries.CreateUser(ctx, db.CreateUserParams{
+	nu, err := r.db.Queries.CreateUser(ctx, postgres.CreateUserParams{
 		Username: u.Username,
 		Email:    u.Email,
 		Password: u.Password,
@@ -82,7 +82,7 @@ func (r *UserRepository) Update(ctx context.Context, u users.User) (users.User, 
 	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
 	defer cancel()
 	pwd := sql.NullString{Valid: u.Password != "", String: u.Password}
-	nu, err := r.db.Queries.UpdateUser(ctx, db.UpdateUserParams{
+	nu, err := r.db.Queries.UpdateUser(ctx, postgres.UpdateUserParams{
 		ID:       u.ID,
 		Username: sql.NullString{Valid: u.Username != "", String: u.Username},
 		Email:    sql.NullString{Valid: u.Email != "", String: u.Email},
@@ -107,7 +107,7 @@ func (r *UserRepository) Delete(ctx context.Context, id int64) (users.User, erro
 	return r.entityToDTO(u), nil
 }
 
-func (r *UserRepository) entityToDTO(u db.User) users.User {
+func (r *UserRepository) entityToDTO(u postgres.User) users.User {
 	return users.User{
 		ID:        u.ID,
 		Username:  u.Username,
