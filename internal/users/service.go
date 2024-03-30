@@ -2,17 +2,18 @@ package users
 
 import (
 	"context"
+	"fmt"
 
 	pkg_errors "github.com/wesleyburlani/go-observability/pkg/errors"
 	"github.com/wesleyburlani/go-observability/pkg/logger"
 )
 
 type Service struct {
-	repo   *Repository
+	repo   Repository
 	logger *logger.Logger
 }
 
-func NewService(repo *Repository, logger *logger.Logger) *Service {
+func NewService(repo Repository, logger *logger.Logger) *Service {
 	return &Service{repo: repo, logger: logger}
 }
 
@@ -33,11 +34,21 @@ func (s *Service) GetByUsername(ctx context.Context, username string) (User, err
 
 func (s *Service) Create(ctx context.Context, u User) (User, error) {
 	s.logger.With("user", u).Debug(ctx, "creating user")
+	encryptedPwd, err := encryptPassword(u.Password)
+	if err != nil {
+		return User{}, fmt.Errorf("could not encrypt password: %w", err)
+	}
+	u.Password = encryptedPwd
 	return s.repo.Create(ctx, u)
 }
 
 func (s *Service) Update(ctx context.Context, u User) (User, error) {
 	s.logger.With("user", u).Debug(ctx, "updating user")
+	encryptedPwd, err := encryptPassword(u.Password)
+	if err != nil {
+		return User{}, fmt.Errorf("could not encrypt password: %w", err)
+	}
+	u.Password = encryptedPwd
 	return s.repo.Update(ctx, u)
 }
 

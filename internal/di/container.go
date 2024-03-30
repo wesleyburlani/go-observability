@@ -4,10 +4,11 @@ import (
 	"github.com/defval/di"
 
 	"github.com/wesleyburlani/go-observability/internal/config"
-	"github.com/wesleyburlani/go-observability/internal/db"
-	"github.com/wesleyburlani/go-observability/internal/transport/grpc"
-	http_controllers "github.com/wesleyburlani/go-observability/internal/transport/http/controllers"
-	"github.com/wesleyburlani/go-observability/internal/transport/kafka/handlers"
+	"github.com/wesleyburlani/go-observability/internal/ports/grpc"
+	http_controllers "github.com/wesleyburlani/go-observability/internal/ports/http/controllers"
+	"github.com/wesleyburlani/go-observability/internal/ports/kafka/handlers"
+	db "github.com/wesleyburlani/go-observability/internal/ports/postgres"
+	"github.com/wesleyburlani/go-observability/internal/ports/postgres/repositories"
 	"github.com/wesleyburlani/go-observability/internal/users"
 	pkg_http "github.com/wesleyburlani/go-observability/pkg/http"
 	pkg_http_controllers "github.com/wesleyburlani/go-observability/pkg/http/controllers"
@@ -40,7 +41,7 @@ func BuildContainer(c *config.Config) (*di.Container, error) {
 	)
 
 	users := di.Options(
-		di.Provide(users.NewRepository),
+		di.Provide(repositories.NewUserRepository, di.As(new(users.Repository))),
 		di.Provide(users.NewService),
 		di.Provide(http_controllers.NewUsers, di.As(new(pkg_http.Controller))),
 		di.Provide(grpc.NewUserServiceGrpc),

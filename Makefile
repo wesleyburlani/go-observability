@@ -13,8 +13,8 @@ generate-db-client:
 generate-proto:
 	protoc \
 		--proto_path=./protofiles \
-		--go_out=./internal/transport/grpc \
-		--go-grpc_out=./internal/transport/grpc \
+		--go_out=./internal/ports/grpc \
+		--go-grpc_out=./internal/ports/grpc \
 		./protofiles/*.proto
 grpc-client:
 	evans ./protofiles/*.proto --host api --port 4000

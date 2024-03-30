@@ -3,7 +3,7 @@ package grpc
 import (
 	"context"
 
-	pb "github.com/wesleyburlani/go-observability/internal/transport/grpc/pb"
+	pb "github.com/wesleyburlani/go-observability/internal/ports/grpc/pb"
 	"github.com/wesleyburlani/go-observability/internal/users"
 )
 

@@ -1,11 +1,17 @@
 
+### health
+
+
+GET http://localhost:3000/health
+
+
 ### get user
 
-GET http://localhost:3000/users/1
+GET http://localhost:3000/users/5
 
 #### create user
 
-POST http://localhost:3000/users
+POST http://localhost:3000/users/
 Content-Type: application/json
 
 {

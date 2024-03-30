@@ -7,7 +7,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/riandyrn/otelchi"
 	"github.com/wesleyburlani/go-observability/internal/config"
-	"github.com/wesleyburlani/go-observability/internal/transport/http/controllers"
+	"github.com/wesleyburlani/go-observability/internal/ports/http/controllers"
 	pkg_http_controllers "github.com/wesleyburlani/go-observability/pkg/http/controllers"
 	pkg_http_middlewares "github.com/wesleyburlani/go-observability/pkg/http/middlewares"
 )

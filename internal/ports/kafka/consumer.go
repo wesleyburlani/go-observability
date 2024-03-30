@@ -7,7 +7,7 @@ import (
 	ckafka "github.com/confluentinc/confluent-kafka-go/v2/kafka"
 	"github.com/defval/di"
 	"github.com/wesleyburlani/go-observability/internal/config"
-	"github.com/wesleyburlani/go-observability/internal/transport/kafka/handlers"
+	"github.com/wesleyburlani/go-observability/internal/ports/kafka/handlers"
 	"github.com/wesleyburlani/go-observability/pkg/logger"
 )
 

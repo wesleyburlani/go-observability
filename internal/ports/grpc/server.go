@@ -2,7 +2,7 @@ package grpc
 
 import (
 	"github.com/defval/di"
-	pb "github.com/wesleyburlani/go-observability/internal/transport/grpc/pb"
+	pb "github.com/wesleyburlani/go-observability/internal/ports/grpc/pb"
 	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"

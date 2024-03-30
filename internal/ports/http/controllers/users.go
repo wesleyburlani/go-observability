@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/go-chi/chi/v5"
-	http_utils "github.com/wesleyburlani/go-observability/internal/transport/http/utils"
+	http_utils "github.com/wesleyburlani/go-observability/internal/ports/http/utils"
 	"github.com/wesleyburlani/go-observability/internal/users"
 	"github.com/wesleyburlani/go-observability/pkg/logger"
 )
