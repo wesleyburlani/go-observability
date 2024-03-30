@@ -185,6 +185,14 @@ services:
     networks:
       - app_net
 
+  rabbitmq:
+    image: rabbitmq:3-management
+    ports:
+      - '5672:5672'
+      - '15672:15672'
+    networks:
+      - app_net
+
 volumes:
   db:
   grafana-data:

@@ -9,6 +9,7 @@ import (
 
 	"github.com/wesleyburlani/go-observability/internal/config"
 	"github.com/wesleyburlani/go-observability/internal/di"
+	"github.com/wesleyburlani/go-observability/internal/transport/amqp"
 	"github.com/wesleyburlani/go-observability/internal/transport/grpc"
 	_http "github.com/wesleyburlani/go-observability/internal/transport/http"
 	"github.com/wesleyburlani/go-observability/internal/transport/kafka"
@@ -40,9 +41,9 @@ func main() {
 
 	err = container.Invoke(func(c *config.Config, l *logger.Logger) {
 		var wg sync.WaitGroup
-		wg.Add(1)
 		httpAddr := c.HttpAddress
 		grpcAddr := c.GrpcAddress
+		wg.Add(1)
 		go func() {
 			defer wg.Done()
 			grpcServer := grpc.CreateGrpcServer(container)
@@ -56,6 +57,7 @@ func main() {
 				os.Exit(1)
 			}
 		}()
+		wg.Add(1)
 		go func() {
 			defer wg.Done()
 			app := _http.CreateApp(container)
@@ -65,6 +67,7 @@ func main() {
 				os.Exit(1)
 			}
 		}()
+		wg.Add(1)
 		go func() {
 			defer wg.Done()
 			err := kafka.StartConsume(ctx, container)
@@ -73,6 +76,17 @@ func main() {
 				os.Exit(1)
 			}
 		}()
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			err := amqp.StartConsume(ctx, container)
+			if err != nil {
+				l.With("error", err).Error(ctx, "error starting amqp consumer")
+				os.Exit(1)
+			}
+
+		}()
+
 		l.With("address", grpcAddr).Info(ctx, "grpc server started")
 		l.With("address", httpAddr).Info(ctx, "http server started")
 		wg.Wait()
