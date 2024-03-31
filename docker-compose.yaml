@@ -190,12 +190,15 @@ services:
     ports:
       - '5672:5672'
       - '15672:15672'
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq
     networks:
       - app_net
 
 volumes:
   db:
   grafana-data:
+  rabbitmq-data:
 networks:
   app_net:
     driver: bridge

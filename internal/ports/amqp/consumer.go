@@ -4,6 +4,7 @@ import (
 	"context"
 	"os"
 	"sync"
+	"time"
 
 	"github.com/defval/di"
 	"github.com/wesleyburlani/go-observability/internal/config"
@@ -15,62 +16,67 @@ import (
 var EXCHANGES = []string{"users"}
 
 func StartConsume(ctx context.Context, c *di.Container) error {
-	err := c.Invoke(func(config *config.Config, l *logger.Logger) {
-		conn, err := amqp_go.Dial(config.AmqpUrl)
-		if err != nil {
-			l.With("error", err).Error(ctx, "error connecting to amqp")
-			os.Exit(1)
-		}
-
-		l.Info(ctx, "amqp connection established")
-
+	err := c.Invoke(func(connManager *ConnectionManager, config *config.Config, l *logger.Logger) {
 		var wg sync.WaitGroup
 		for _, exchange := range EXCHANGES {
 			wg.Add(1)
 			go func(exchange string) {
 				defer wg.Done()
-				queue := config.ServiceName + "." + exchange
+				queue := exchange + "_" + config.ServiceName + "_" + config.ServiceVersion
 
-				ch, err := conn.Channel()
-				if err != nil {
-					l.With("error", err).Error(ctx, "error creating channel")
-					os.Exit(1)
+				var ch *amqp_go.Channel
+				consumerManager := func() {
+					for {
+						conn := connManager.GetConnection(ctx)
+						var err error
+						ch, err = conn.Channel()
+						if err == nil {
+							break
+						}
+						time.Sleep(3 * time.Second)
+					}
+
+					err := ch.ExchangeDeclare(exchange, "fanout", true, false, false, false, nil)
+
+					if err != nil {
+						l.With("error", err).With("exchange", exchange).Error(ctx, "error declaring exchange")
+						os.Exit(1)
+					}
+
+					l.With("exchange", exchange, "queue", queue).Info(ctx, "declaring queue to start consuming messages")
+					q, err := ch.QueueDeclare(queue, true, false, false, false, nil)
+
+					if err != nil {
+						l.With("error", err).With("queue", queue).Error(ctx, "error declaring queue")
+						os.Exit(1)
+					}
+
+					err = ch.QueueBind(q.Name, "", exchange, false, nil)
+
+					if err != nil {
+						l.With("error", err, "exchange", exchange, "queue", queue).Error(ctx, "error binding queue")
+						os.Exit(1)
+					}
+
+					msgs, err := ch.Consume(q.Name, "", true, false, false, false, nil)
+
+					if err != nil {
+						l.With("error", err, "queue", queue).Error(ctx, "error consuming queue")
+						os.Exit(1)
+					}
+
+					for d := range msgs {
+						l.With("message", string(d.Body), "queue", queue).Info(ctx, "received message")
+						messageHandler(ctx, exchange, &d, c)
+					}
 				}
-				defer ch.Close()
 
-				err = ch.ExchangeDeclare(exchange, "fanout", true, false, false, false, nil)
+				consumerManager()
 
-				if err != nil {
-					l.With("error", err).With("exchange", exchange).Error(ctx, "error declaring exchange")
-					os.Exit(1)
-				}
-
-				l.With("exchange", exchange, "queue", queue).Info(ctx, "declaring queue to start consuming messages")
-				q, err := ch.QueueDeclare(queue, false, false, true, false, nil)
-
-				if err != nil {
-					l.With("error", err).With("queue", queue).Error(ctx, "error declaring queue")
-					os.Exit(1)
-				}
-
-				err = ch.QueueBind(q.Name, "", exchange, false, nil)
-
-				if err != nil {
-					l.With("error", err, "exchange", exchange, "queue", queue).Error(ctx, "error binding queue")
-					os.Exit(1)
-				}
-
-				msgs, err := ch.Consume(q.Name, "", true, false, false, false, nil)
-
-				if err != nil {
-					l.With("error", err, "queue", queue).Error(ctx, "error consuming queue")
-					os.Exit(1)
-				}
-
-				for d := range msgs {
-					l.With("message", string(d.Body), "queue", queue).Info(ctx, "received message")
-					messageHandler(ctx, exchange, &d, c)
-				}
+				go func() {
+					<-ch.NotifyClose(make(chan *amqp_go.Error))
+					consumerManager()
+				}()
 
 			}(exchange)
 		}

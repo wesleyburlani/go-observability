@@ -3,18 +3,20 @@ package users
 import (
 	"context"
 	"fmt"
+	"sync"
 
 	pkg_errors "github.com/wesleyburlani/go-observability/pkg/errors"
 	"github.com/wesleyburlani/go-observability/pkg/logger"
 )
 
 type Service struct {
-	repo   Repository
-	logger *logger.Logger
+	observers []UserEventsObserver
+	repo      Repository
+	logger    *logger.Logger
 }
 
-func NewService(repo Repository, logger *logger.Logger) *Service {
-	return &Service{repo: repo, logger: logger}
+func NewService(repo Repository, logger *logger.Logger, observers []UserEventsObserver) *Service {
+	return &Service{repo: repo, logger: logger, observers: observers}
 }
 
 func (s *Service) Get(ctx context.Context, id int64) (User, error) {
@@ -39,7 +41,20 @@ func (s *Service) Create(ctx context.Context, u User) (User, error) {
 		return User{}, fmt.Errorf("could not encrypt password: %w", err)
 	}
 	u.Password = encryptedPwd
-	return s.repo.Create(ctx, u)
+	createdUser, err := s.repo.Create(ctx, u)
+	if err != nil {
+		return User{}, err
+	}
+	var waitGroup sync.WaitGroup
+	for _, observer := range s.observers {
+		waitGroup.Add(1)
+		go func(observer UserEventsObserver) {
+			observer.OnUserCreated(ctx, createdUser)
+			waitGroup.Done()
+		}(observer)
+	}
+	waitGroup.Wait()
+	return createdUser, nil
 }
 
 func (s *Service) Update(ctx context.Context, u User) (User, error) {
@@ -49,12 +64,38 @@ func (s *Service) Update(ctx context.Context, u User) (User, error) {
 		return User{}, fmt.Errorf("could not encrypt password: %w", err)
 	}
 	u.Password = encryptedPwd
-	return s.repo.Update(ctx, u)
+	updatedUser, err := s.repo.Update(ctx, u)
+	if err != nil {
+		return User{}, err
+	}
+	var waitGroup sync.WaitGroup
+	for _, observer := range s.observers {
+		waitGroup.Add(1)
+		go func(observer UserEventsObserver) {
+			observer.OnUserUpdated(ctx, updatedUser)
+			waitGroup.Done()
+		}(observer)
+	}
+	waitGroup.Wait()
+	return updatedUser, nil
 }
 
 func (s *Service) Delete(ctx context.Context, id int64) (User, error) {
 	s.logger.With("user", id).Debug(ctx, "deleting user")
-	return s.repo.Delete(ctx, id)
+	deletedUser, err := s.repo.Delete(ctx, id)
+	if err != nil {
+		return User{}, err
+	}
+	var waitGroup sync.WaitGroup
+	for _, observer := range s.observers {
+		waitGroup.Add(1)
+		go func(observer UserEventsObserver) {
+			observer.OnUserDeleted(ctx, deletedUser)
+			waitGroup.Done()
+		}(observer)
+	}
+	waitGroup.Wait()
+	return deletedUser, nil
 }
 
 func (s *Service) Login(ctx context.Context, username, password string) error {
