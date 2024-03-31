@@ -24,41 +24,52 @@ func StartConsume(ctx context.Context, c *di.Container) error {
 				defer wg.Done()
 				queue := exchange + "_" + config.ServiceName + "_" + config.ServiceVersion
 
-				var ch *amqp_go.Channel
-				consumerManager := func() {
+				var channel *amqp_go.Channel
+				queueConsumer := func() {
 					for {
 						conn := connManager.GetConnection(ctx)
 						var err error
-						ch, err = conn.Channel()
+						channel, err = conn.Channel()
 						if err == nil {
 							break
 						}
 						time.Sleep(3 * time.Second)
 					}
 
-					err := ch.ExchangeDeclare(exchange, "fanout", true, false, false, false, nil)
+					err := channel.ExchangeDeclare(exchange, "fanout", true, false, false, false, nil)
 
 					if err != nil {
 						l.With("error", err).With("exchange", exchange).Error(ctx, "error declaring exchange")
 						os.Exit(1)
 					}
 
-					l.With("exchange", exchange, "queue", queue).Info(ctx, "declaring queue to start consuming messages")
-					q, err := ch.QueueDeclare(queue, true, false, false, false, nil)
+					dlq := queue + "_dlq"
+					_, err = channel.QueueDeclare(dlq, true, false, false, false, nil)
+
+					if err != nil {
+						l.With("error", err).With("queue", dlq).Error(ctx, "error declaring dlq")
+						os.Exit(1)
+					}
+
+					l.With("exchange", exchange, "queue", queue).Debug(ctx, "declaring queue to start consuming messages")
+					args := amqp_go.Table{}
+					args["x-dead-letter-exchange"] = dlq
+
+					q, err := channel.QueueDeclare(queue, true, false, false, false, args)
 
 					if err != nil {
 						l.With("error", err).With("queue", queue).Error(ctx, "error declaring queue")
 						os.Exit(1)
 					}
 
-					err = ch.QueueBind(q.Name, "", exchange, false, nil)
+					err = channel.QueueBind(q.Name, "", exchange, false, nil)
 
 					if err != nil {
 						l.With("error", err, "exchange", exchange, "queue", queue).Error(ctx, "error binding queue")
 						os.Exit(1)
 					}
 
-					msgs, err := ch.Consume(q.Name, "", true, false, false, false, nil)
+					msgs, err := channel.Consume(q.Name, "", true, false, false, false, nil)
 
 					if err != nil {
 						l.With("error", err, "queue", queue).Error(ctx, "error consuming queue")
@@ -66,18 +77,14 @@ func StartConsume(ctx context.Context, c *di.Container) error {
 					}
 
 					for d := range msgs {
-						l.With("message", string(d.Body), "queue", queue).Info(ctx, "received message")
 						messageHandler(ctx, exchange, &d, c)
 					}
 				}
 
-				consumerManager()
-
-				go func() {
-					<-ch.NotifyClose(make(chan *amqp_go.Error))
-					consumerManager()
-				}()
-
+				for {
+					queueConsumer()
+					<-channel.NotifyClose(make(chan *amqp_go.Error))
+				}
 			}(exchange)
 		}
 		wg.Wait()
@@ -88,11 +95,11 @@ func StartConsume(ctx context.Context, c *di.Container) error {
 func messageHandler(ctx context.Context, exchange string, msg *amqp_go.Delivery, c *di.Container) error {
 	var l *logger.Logger
 	c.Resolve(&l)
-	l.With("message", string(msg.Body), "exchange", exchange).Info(ctx, "received message")
+	l.With("message", string(msg.Body), "exchange", exchange).Debug(ctx, "received message")
 
 	switch exchange {
 	default:
-		l.With("exchange", exchange).Error(ctx, "unknown exchange")
+		l.With("exchange", exchange).Warn(ctx, "unknown exchange")
 	}
 	return nil
 }

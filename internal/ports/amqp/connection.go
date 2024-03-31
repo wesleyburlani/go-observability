@@ -26,7 +26,7 @@ func (c *ConnectionManager) GetConnection(ctx context.Context) *amqp_go.Connecti
 		return c.conn
 	}
 
-	c.logger.Info(ctx, "connecting to amqp")
+	c.logger.Debug(ctx, "connecting to amqp")
 	for {
 		conn, err := amqp_go.Dial(c.url)
 		if err == nil {
@@ -40,11 +40,11 @@ func (c *ConnectionManager) GetConnection(ctx context.Context) *amqp_go.Connecti
 
 	go func() {
 		err := <-c.conn.NotifyClose(make(chan *amqp_go.Error))
-		c.logger.With("error", err).Error(ctx, "amqp connection closed")
+		c.logger.With("error", err).Warn(ctx, "amqp connection closed")
 		c.conn = nil
 		c.GetConnection(ctx)
 	}()
 
-	c.logger.Info(ctx, "amqp connection established")
+	c.logger.Debug(ctx, "amqp connection established")
 	return c.conn
 }
