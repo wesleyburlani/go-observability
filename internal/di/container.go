@@ -4,7 +4,6 @@ import (
 	"github.com/defval/di"
 
 	"github.com/wesleyburlani/go-observability/internal/config"
-	"github.com/wesleyburlani/go-observability/internal/ports/amqp"
 	"github.com/wesleyburlani/go-observability/internal/ports/grpc"
 	http_controllers "github.com/wesleyburlani/go-observability/internal/ports/http/controllers"
 	"github.com/wesleyburlani/go-observability/internal/ports/kafka/handlers"
@@ -17,6 +16,8 @@ import (
 	pkg_http_middlewares "github.com/wesleyburlani/go-observability/pkg/http/middlewares"
 	"github.com/wesleyburlani/go-observability/pkg/logger"
 	"github.com/wesleyburlani/go-observability/pkg/utils"
+
+	pkg_amqp "github.com/wesleyburlani/go-observability/pkg/amqp"
 )
 
 func BuildContainer(c *config.Config) (*di.Container, error) {
@@ -30,8 +31,8 @@ func BuildContainer(c *config.Config) (*di.Container, error) {
 	)
 
 	connections := di.Options(
-		di.Provide(func(logger *logger.Logger) *amqp.ConnectionManager {
-			return amqp.NewConnectionManager(c.AmqpUrl, logger)
+		di.Provide(func(logger *logger.Logger) *pkg_amqp.ConnectionManager {
+			return pkg_amqp.NewConnectionManager(c.AmqpUrl, logger)
 		}),
 	)
 

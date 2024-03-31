@@ -11,12 +11,14 @@ import (
 	"github.com/wesleyburlani/go-observability/pkg/logger"
 
 	amqp_go "github.com/rabbitmq/amqp091-go"
+
+	pkg_amqp "github.com/wesleyburlani/go-observability/pkg/amqp"
 )
 
 var EXCHANGES = []string{"users"}
 
 func StartConsume(ctx context.Context, c *di.Container) error {
-	err := c.Invoke(func(connManager *ConnectionManager, config *config.Config, l *logger.Logger) {
+	err := c.Invoke(func(connManager *pkg_amqp.ConnectionManager, config *config.Config, l *logger.Logger) {
 		var wg sync.WaitGroup
 		for _, exchange := range EXCHANGES {
 			wg.Add(1)
