@@ -4,12 +4,13 @@ import (
 	"github.com/defval/di"
 
 	"github.com/wesleyburlani/go-observability/internal/config"
+	amqp_observers "github.com/wesleyburlani/go-observability/internal/ports/amqp/observers"
 	"github.com/wesleyburlani/go-observability/internal/ports/grpc"
 	http_controllers "github.com/wesleyburlani/go-observability/internal/ports/http/controllers"
 	"github.com/wesleyburlani/go-observability/internal/ports/kafka/handlers"
 	"github.com/wesleyburlani/go-observability/internal/ports/postgres"
 	"github.com/wesleyburlani/go-observability/internal/ports/postgres/repositories"
-	"github.com/wesleyburlani/go-observability/internal/ports/stdout/observers"
+	stdout_observers "github.com/wesleyburlani/go-observability/internal/ports/stdout/observers"
 	"github.com/wesleyburlani/go-observability/internal/users"
 	pkg_http "github.com/wesleyburlani/go-observability/pkg/http"
 	pkg_http_controllers "github.com/wesleyburlani/go-observability/pkg/http/controllers"
@@ -55,7 +56,8 @@ func BuildContainer(c *config.Config) (*di.Container, error) {
 		di.Provide(http_controllers.NewUsers, di.As(new(pkg_http.Controller))),
 		di.Provide(grpc.NewUserServiceGrpc),
 		di.Provide(handlers.NewUserTopicHandler),
-		di.Provide(observers.NewUserEventsObserver, di.As(new(users.UserEventsObserver))),
+		di.Provide(stdout_observers.NewUserEventsObserver, di.As(new(users.UserEventsObserver))),
+		di.Provide(amqp_observers.NewUserEventsObserver, di.As(new(users.UserEventsObserver))),
 	)
 
 	container, err := di.New(general, connections, storage, observability, users)

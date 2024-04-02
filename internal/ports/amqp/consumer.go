@@ -12,13 +12,13 @@ import (
 
 	amqp_go "github.com/rabbitmq/amqp091-go"
 
-	pkg_amqp "github.com/wesleyburlani/go-observability/pkg/amqp"
+	amqp_pkg "github.com/wesleyburlani/go-observability/pkg/amqp"
 )
 
 var EXCHANGES = []string{"users"}
 
 func StartConsume(ctx context.Context, c *di.Container) error {
-	err := c.Invoke(func(connManager *pkg_amqp.ConnectionManager, config *config.Config, l *logger.Logger) {
+	err := c.Invoke(func(connManager *amqp_pkg.ConnectionManager, config *config.Config, l *logger.Logger) {
 		var wg sync.WaitGroup
 		for _, exchange := range EXCHANGES {
 			wg.Add(1)
@@ -71,7 +71,7 @@ func StartConsume(ctx context.Context, c *di.Container) error {
 						os.Exit(1)
 					}
 
-					msgs, err := channel.Consume(q.Name, "", true, false, false, false, nil)
+					msgs, err := channel.ConsumeWithContext(ctx, q.Name, "", true, false, false, false, nil)
 
 					if err != nil {
 						l.With("error", err, "queue", queue).Error(ctx, "error consuming queue")
