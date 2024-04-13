@@ -1,5 +1,5 @@
 test:
-	go test -v ./...
+	make migrations-up && go test -v ./...
 build:
 	go build -o bin/api cmd/api/main.go
 clean:
